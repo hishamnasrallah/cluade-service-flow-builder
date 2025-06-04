@@ -1,4 +1,4 @@
-
+<!-- src/app/components/toolbox/toolbox.component.html - CORRECTED VERSION -->
 <div class="toolbox-container">
   <!-- Toolbox Header -->
   <div class="toolbox-header">
@@ -120,7 +120,7 @@
           *ngFor="let category of categories; trackBy: trackByCategory"
           [expanded]="category.expanded"
           class="category-panel"
-          [class]="'category-' + category.name.toLowerCase().replace(/s+/g, '-')">
+          [class]="getCategoryClass(category.name)">
 
           <mat-expansion-panel-header class="category-header">
             <mat-panel-title class="category-title">

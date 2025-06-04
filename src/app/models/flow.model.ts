@@ -1,11 +1,12 @@
-// models/flow.model.ts
+// src/app/models/flow.model.ts - CORRECTED VERSION
 export interface FlowNode {
   id: string;
-  type: 'page' | 'condition' | 'start' | 'end' | 'decision';
+  type: 'page' | 'condition' | 'start' | 'end' | 'decision' | 'field' | 'validation' | 'calculation' | 'api_call' | 'database';
   label: string;
   position: { x: number; y: number };
   data: any;
   connections: string[];
+  collapsed?: boolean; // Added missing property
 }
 
 export interface FlowConnection {
@@ -33,6 +34,10 @@ export interface Page {
   service_name: string;
   sequence_number_name: string;
   active_ind: boolean;
+  featured?: boolean; // Added missing property
+  modified_date?: string; // Added missing property
+  created_date?: string;
+  updated_at?: string;
 }
 
 export interface Field {

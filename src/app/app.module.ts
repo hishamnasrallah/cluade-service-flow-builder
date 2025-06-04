@@ -1,3 +1,4 @@
+// src/app/app.module.ts - CORRECTED VERSION
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -5,7 +6,10 @@ import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 
-// Angular Material
+// Import routes from separate file
+import { routes } from './app.routes';
+
+// Angular Material Imports
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -24,6 +28,11 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatBadgeModule } from '@angular/material/badge';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatRippleModule } from '@angular/material/core';
+import { MatDividerModule } from '@angular/material/divider';
 
 // Components
 import { AppComponent } from './app.component';
@@ -43,9 +52,6 @@ import { FlowService } from './services/flow.service';
 // Guards and Interceptors
 import { AuthInterceptor } from './interceptors/auth.interceptor';
 import { AuthGuard } from './guards/auth.guard';
-import {MatButtonToggle, MatButtonToggleGroup} from "@angular/material/button-toggle";
-import {MatBadge} from "@angular/material/badge";
-import {MatChipListbox, MatChipOption} from "@angular/material/chips";
 
 @NgModule({
   declarations: [
@@ -64,14 +70,10 @@ import {MatChipListbox, MatChipOption} from "@angular/material/chips";
     HttpClientModule,
     FormsModule,
     ReactiveFormsModule,
-    RouterModule.forRoot([
-      {path: 'login', component: LoginComponent},
-      {path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard]},
-      {path: 'designer/:id', component: FlowDesignerComponent, canActivate: [AuthGuard]},
-      {path: 'designer', component: FlowDesignerComponent, canActivate: [AuthGuard]},
-      {path: '', redirectTo: '/dashboard', pathMatch: 'full'},
-      {path: '**', redirectTo: '/dashboard'}
-    ]),
+    RouterModule.forRoot(routes, {
+      enableTracing: false,
+      onSameUrlNavigation: 'reload'
+    }),
 
     // Material Modules
     MatToolbarModule,
@@ -92,21 +94,22 @@ import {MatChipListbox, MatChipOption} from "@angular/material/chips";
     MatMenuModule,
     MatTooltipModule,
     MatSlideToggleModule,
-    MatButtonToggle,
-    MatBadge,
-    MatButtonToggleGroup,
-    MatChipListbox,
-    MatChipOption
+    MatButtonToggleModule,
+    MatBadgeModule,
+    MatChipsModule,
+    MatRippleModule,
+    MatDividerModule
   ],
   providers: [
     AuthService,
     ApiService,
     FlowService,
-    // {
-    //   provide: HTTP_INTERCEPTORS,
-    //   useClass: AuthInterceptor,
-    //   multi: true
-    // }
+    AuthGuard,
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true
+    }
   ],
   bootstrap: [AppComponent]
 })

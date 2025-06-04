@@ -1,4 +1,4 @@
-// components/toolbox/toolbox.component.ts - Enhanced with modern UI/UX
+// src/app/components/toolbox/toolbox.component.ts - CORRECTED VERSION
 import { Component, EventEmitter, Output, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 
@@ -24,8 +24,8 @@ interface ToolboxCategory {
 
 @Component({
   selector: 'app-toolbox',
-  templateUrl:'toolbox.component.html',
-  styleUrl: 'toolbox.component.scss',
+  templateUrl: './toolbox.component.html',
+  styleUrls: ['./toolbox.component.scss']
 })
 export class ToolboxComponent implements OnInit {
   @Output() nodeDropped = new EventEmitter<any>();
@@ -471,13 +471,13 @@ export class ToolboxComponent implements OnInit {
   }
 
   private loadRecentItems(): void {
-    const saved = localStorage.getItem('toolbox-recent-items');
-    if (saved) {
-      try {
+    try {
+      const saved = localStorage.getItem('toolbox-recent-items');
+      if (saved) {
         this.recentItems = JSON.parse(saved);
-      } catch (error) {
-        console.warn('Failed to load recent items:', error);
       }
+    } catch (error) {
+      console.warn('Failed to load recent items:', error);
     }
   }
 
@@ -490,18 +490,18 @@ export class ToolboxComponent implements OnInit {
   }
 
   private initializeExpandedState(): void {
-    const saved = localStorage.getItem('toolbox-categories-state');
-    if (saved) {
-      try {
+    try {
+      const saved = localStorage.getItem('toolbox-categories-state');
+      if (saved) {
         const state = JSON.parse(saved);
         this.categories.forEach(category => {
           if (state[category.name] !== undefined) {
             category.expanded = state[category.name];
           }
         });
-      } catch (error) {
-        console.warn('Failed to load categories state:', error);
       }
+    } catch (error) {
+      console.warn('Failed to load categories state:', error);
     }
   }
 
@@ -526,5 +526,9 @@ export class ToolboxComponent implements OnInit {
 
   trackByCategory(index: number, category: ToolboxCategory): string {
     return category.name;
+  }
+
+  getCategoryClass(categoryName: string): string {
+    return 'category-' + categoryName.toLowerCase().replace(/\s+/g, '-');
   }
 }

@@ -213,7 +213,7 @@
           <div class="page-card hover-lift"
                *ngFor="let page of filteredPages; trackBy: trackByPageId"
                (click)="editPage(page)"
-               [class.featured]="page.featured">
+               [class.featured]="page.featured || false">
             <div class="card-header">
               <div class="page-icon">
                 <mat-icon>{{getPageIcon(page)}}</mat-icon>
@@ -276,6 +276,7 @@
 
         <!-- List View -->
         <div class="pages-list" *ngIf="viewMode === 'list'">
+
           <div class="list-header">
             <div class="col-name">Name</div>
             <div class="col-service">Service</div>
@@ -301,7 +302,7 @@
                 <span>{{page.active_ind ? 'Active' : 'Inactive'}}</span>
               </div>
             </div>
-            <div class="col-modified">{{getRelativeTime(page.modified_date)}}</div>
+            <div class="col-modified">{{getRelativeTime(page.modified_date || page.updated_at || '')}}</div>
             <div class="col-actions">
               <button mat-icon-button (click)="editPage(page)" matTooltip="Edit">
                 <mat-icon>edit</mat-icon>
@@ -309,13 +310,39 @@
               <button mat-icon-button (click)="viewPageSchema(page)" matTooltip="Preview">
                 <mat-icon>visibility</mat-icon>
               </button>
-              <button mat-icon-button [matMenuTriggerFor]="listPageMenu" matTooltip="More">
+              <!-- Add this mat-menu template reference -->
+              <mat-menu #listPageMenu="matMenu">
+                <button mat-menu-item (click)="editPage(selectedPage)" *ngIf="selectedPage">
+                  <mat-icon>edit</mat-icon>
+                  <span>Edit</span>
+                </button>
+                <button mat-menu-item (click)="duplicatePage(selectedPage)" *ngIf="selectedPage">
+                  <mat-icon>content_copy</mat-icon>
+                  <span>Duplicate</span>
+                </button>
+                <button mat-menu-item (click)="exportPage(selectedPage)" *ngIf="selectedPage">
+                  <mat-icon>download</mat-icon>
+                  <span>Export</span>
+                </button>
+                <mat-divider></mat-divider>
+                <button mat-menu-item (click)="deletePage(selectedPage)" *ngIf="selectedPage" class="delete-item">
+                  <mat-icon>delete</mat-icon>
+                  <span>Delete</span>
+                </button>
+              </mat-menu>
+              <button mat-icon-button
+                      [matMenuTriggerFor]="listPageMenu"
+                      matTooltip="More"
+                      (click)="selectedPage = page">
                 <mat-icon>more_vert</mat-icon>
               </button>
             </div>
           </div>
+
         </div>
+
       </div>
+
 
       <!-- Empty State -->
       <ng-template #noPages>

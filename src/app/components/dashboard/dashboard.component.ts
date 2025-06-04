@@ -1,4 +1,4 @@
-// components/dashboard/dashboard.component.ts - Enhanced with modern UI/UX
+// src/app/components/dashboard/dashboard.component.ts - CORRECTED VERSION
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
@@ -10,7 +10,7 @@ import { Page } from '../../models/flow.model';
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
-  styleUrls: ['dashboard.component.scss']
+  styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent implements OnInit {
   pages: Page[] = [];
@@ -22,6 +22,7 @@ export class DashboardComponent implements OnInit {
   viewMode: 'grid' | 'list' = 'grid';
   notificationCount = 3;
   currentUser: any = { name: 'John Doe', email: 'john.doe@example.com' };
+  selectedPage: Page | null = null; // Added missing property
 
   recentActivities = [
     {
@@ -130,10 +131,12 @@ export class DashboardComponent implements OnInit {
   }
 
   editPage(page: Page): void {
+    this.selectedPage = page;
     this.router.navigate(['/designer', page.id]);
   }
 
   duplicatePage(page: Page): void {
+    this.selectedPage = page;
     this.snackBar.open(`Duplicating "${page.name}"...`, 'Close', {
       duration: 2000,
       panelClass: ['info-snackbar']
@@ -142,6 +145,7 @@ export class DashboardComponent implements OnInit {
   }
 
   exportPage(page: Page): void {
+    this.selectedPage = page;
     this.apiService.exportForm(page.id).subscribe({
       next: (data) => {
         // Create download
@@ -168,6 +172,7 @@ export class DashboardComponent implements OnInit {
   }
 
   deletePage(page: Page): void {
+    this.selectedPage = page;
     if (confirm(`Are you sure you want to delete "${page.name}"?`)) {
       this.apiService.deletePage(page.id).subscribe({
         next: () => {
@@ -189,6 +194,7 @@ export class DashboardComponent implements OnInit {
   }
 
   viewPageSchema(page: Page): void {
+    this.selectedPage = page;
     this.apiService.getFormSchema(page.id).subscribe({
       next: (schema) => {
         console.log('Page Schema:', schema);
@@ -261,9 +267,23 @@ export class DashboardComponent implements OnInit {
     return iconMap[page.service_name] || iconMap['default'];
   }
 
-  getRelativeTime(date: string): string {
-    // Mock implementation - implement proper relative time
-    return 'Yesterday';
+  getRelativeTime(date: string | undefined): string {
+    if (!date) return 'Unknown';
+
+    try {
+      const now = new Date();
+      const past = new Date(date);
+      const diffMs = now.getTime() - past.getTime();
+      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+      if (diffDays === 0) return 'Today';
+      if (diffDays === 1) return 'Yesterday';
+      if (diffDays < 7) return `${diffDays} days ago`;
+      if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+      return `${Math.floor(diffDays / 30)} months ago`;
+    } catch (error) {
+      return 'Unknown';
+    }
   }
 
   trackByPageId(index: number, page: Page): number {

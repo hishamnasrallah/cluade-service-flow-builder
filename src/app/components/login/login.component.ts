@@ -1,21 +1,22 @@
-// components/login/login.component.ts - Enhanced with modern UI/UX
+// src/app/components/login/login.component.ts - CORRECTED VERSION
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../../services/auth.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
-  styleUrl: 'login.component.scss'
+  styleUrls: ['./login.component.scss']
 })
 export class LoginComponent implements OnInit {
   loginForm: FormGroup;
   loading = false;
   hidePassword = true;
   submitAttempted = false;
-  production = false; // Set based on environment
+  production = environment.production; // Use environment config
 
   constructor(
     private formBuilder: FormBuilder,
