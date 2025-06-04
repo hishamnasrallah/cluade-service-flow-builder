@@ -6,7 +6,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subscription } from 'rxjs';
 import { FlowService } from '../../services/flow.service';
 import { ApiService } from '../../services/api.service';
-import { ServiceFlow, FlowNode } from '../../models/flow.model';
+import { ServiceFlow, FlowNode, FlowConnection } from '../../models/flow.model';
 import { NodeDialogComponent } from '../node-dialog/node-dialog.component';
 
 @Component({
@@ -269,7 +269,7 @@ export class FlowDesignerComponent implements OnInit, OnDestroy {
     this.snackBar.open('Node deleted', 'Close', { duration: 2000 });
   }
 
-  onConnectionCreated(connection: any): void {
+  onConnectionCreated(connection: FlowConnection): void {
     this.flowService.addConnection(connection);
   }
 

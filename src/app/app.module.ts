@@ -1,3 +1,4 @@
+import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
@@ -24,6 +25,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
+// Components
 import { AppComponent } from './app.component';
 import { LoginComponent } from './components/login/login.component';
 import { FlowDesignerComponent } from './components/flow-designer/flow-designer.component';
@@ -33,12 +35,14 @@ import { FlowCanvasComponent } from './components/flow-canvas/flow-canvas.compon
 import { NodeDialogComponent } from './components/node-dialog/node-dialog.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 
+// Services
 import { AuthService } from './services/auth.service';
 import { ApiService } from './services/api.service';
 import { FlowService } from './services/flow.service';
+
+// Guards and Interceptors
 import { AuthInterceptor } from './interceptors/auth.interceptor';
 import { AuthGuard } from './guards/auth.guard';
-import {NgModule} from "@angular/core";
 
 @NgModule({
   declarations: [
@@ -62,7 +66,8 @@ import {NgModule} from "@angular/core";
       { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard] },
       { path: 'designer/:id', component: FlowDesignerComponent, canActivate: [AuthGuard] },
       { path: 'designer', component: FlowDesignerComponent, canActivate: [AuthGuard] },
-      { path: '', redirectTo: '/dashboard', pathMatch: 'full' }
+      { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
+      { path: '**', redirectTo: '/dashboard' }
     ]),
 
     // Material Modules
@@ -89,7 +94,6 @@ import {NgModule} from "@angular/core";
     AuthService,
     ApiService,
     FlowService,
-    // AuthGuard,
     // {
     //   provide: HTTP_INTERCEPTORS,
     //   useClass: AuthInterceptor,

@@ -15,16 +15,16 @@ import { FlowNode } from '../../models/flow.model';
         <div *ngIf="data.node" class="node-details">
           <h4>Node Details:</h4>
           <div class="detail-row">
-            <strong>ID:</strong> {{data.node.id}}
+            <strong>ID:</strong> {{data.node?.id || 'N/A'}}
           </div>
           <div class="detail-row">
-            <strong>Type:</strong> {{data.node.type}}
+            <strong>Type:</strong> {{data.node?.type || 'N/A'}}
           </div>
           <div class="detail-row">
-            <strong>Label:</strong> {{data.node.label}}
+            <strong>Label:</strong> {{data.node?.label || 'N/A'}}
           </div>
           <div class="detail-row">
-            <strong>Position:</strong> ({{data.node.position.x}}, {{data.node.position.y}})
+            <strong>Position:</strong> ({{data.node?.position?.x || 0}}, {{data.node?.position?.y || 0}})
           </div>
         </div>
       </div>

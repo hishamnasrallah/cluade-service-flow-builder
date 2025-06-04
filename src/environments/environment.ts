@@ -1,7 +1,7 @@
 // src/environments/environment.ts
 export const environment = {
   production: false,
-  apiBaseUrl: 'http://localhost:8001/',  // Configurable Django backend URL
+  apiBaseUrl: 'http://localhost:8001/dynamic/api/v1',  // Configurable Django backend URL
   appName: 'Service Flow Designer',
   version: '1.0.0',
   features: {
