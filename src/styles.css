@@ -1,1 +1,75 @@
 /* You can add global styles to this file, and also import other style files */
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Material overrides */
+.mat-toolbar {
+  font-weight: 500;
+}
+
+.mat-card {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+  border-radius: 8px !important;
+}
+
+.mat-raised-button {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+}
+
+/* Flow designer specific styles */
+.flow-container {
+  height: 100vh;
+  overflow: hidden;
+}
+
+.designer-grid {
+  background-image:
+    linear-gradient(to right, #f0f0f0 1px, transparent 1px),
+    linear-gradient(to bottom, #f0f0f0 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Node animations */
+@keyframes nodeHighlight {
+  0% { box-shadow: 0 0 0 0 rgba(33, 150, 243, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(33, 150, 243, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(33, 150, 243, 0); }
+}
+
+.node-highlight {
+  animation: nodeHighlight 1s ease-out;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .toolbox-panel {
+    width: 250px !important;
+  }
+
+  .properties-panel {
+    width: 280px !important;
+  }
+}

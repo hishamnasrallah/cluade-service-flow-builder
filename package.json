@@ -1,36 +1,82 @@
 {
-  "name": "cluade-service-flow-builder",
-  "version": "0.0.0",
+  "name": "service-flow-designer",
+  "version": "1.0.0",
+  "description": "Professional service flow designer built with Angular 18",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "build:prod": "ng build --configuration production",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "test:watch": "ng test --watch",
+    "test:coverage": "ng test --code-coverage",
+    "lint": "ng lint",
+    "lint:fix": "ng lint --fix",
+    "e2e": "ng e2e",
+    "serve:prod": "ng serve --configuration production",
+    "analyze": "ng build --stats-json && npx webpack-bundle-analyzer dist/service-flow-designer/stats.json",
+    "extract-i18n": "ng extract-i18n"
   },
-  "private": true,
   "dependencies": {
-    "@angular/common": "^20.0.0",
-    "@angular/compiler": "^20.0.0",
-    "@angular/core": "^20.0.0",
-    "@angular/forms": "^20.0.0",
-    "@angular/platform-browser": "^20.0.0",
-    "@angular/router": "^20.0.0",
+    "@angular/animations": "^18.2.0",
+    "@angular/build": "^18.2.0",
+    "@angular/cdk": "^18.2.0",
+    "@angular/common": "^18.2.0",
+    "@angular/compiler": "^18.2.0",
+    "@angular/core": "^18.2.0",
+    "@angular/forms": "^18.2.0",
+    "@angular/material": "^18.2.0",
+    "@angular/platform-browser": "^18.2.0",
+    "@angular/platform-browser-dynamic": "^18.2.0",
+    "@angular/router": "^18.2.0",
+    "@angular/service-worker": "^18.2.0",
     "rxjs": "~7.8.0",
-    "tslib": "^2.3.0",
-    "zone.js": "~0.15.0"
+    "tslib": "^2.6.0",
+    "zone.js": "~0.14.0"
   },
   "devDependencies": {
-    "@angular/build": "^20.0.0",
-    "@angular/cli": "^20.0.0",
-    "@angular/compiler-cli": "^20.0.0",
+    "@angular-devkit/build-angular": "^18.0.0",
+    "@angular-eslint/builder": "^18.0.0",
+    "@angular-eslint/eslint-plugin": "^18.0.0",
+    "@angular-eslint/eslint-plugin-template": "^18.0.0",
+    "@angular-eslint/schematics": "^18.0.0",
+    "@angular-eslint/template-parser": "^18.0.0",
+    "@angular/cli": "^18.2.0",
+    "@angular/compiler-cli": "^18.2.0",
     "@types/jasmine": "~5.1.0",
-    "jasmine-core": "~5.7.0",
+    "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "eslint": "^8.57.0",
+    "jasmine-core": "~5.1.0",
     "karma": "~6.4.0",
-    "karma-chrome-launcher": "~3.2.0",
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
-    "typescript": "~5.8.2"
-  }
+    "typescript": "~5.5.0",
+    "webpack-bundle-analyzer": "^4.10.0"
+  },
+  "engines": {
+    "node": ">=18.19.0",
+    "npm": ">=9.0.0"
+  },
+  "keywords": [
+    "angular",
+    "angular18",
+    "flow-designer",
+    "workflow",
+    "visual-designer",
+    "form-builder",
+    "drag-drop",
+    "material-design"
+  ],
+  "author": "Service Flow Designer Team",
+  "license": "MIT",
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead",
+    "not Explorer 11"
+  ]
 }
