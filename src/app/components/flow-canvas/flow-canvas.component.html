@@ -1,0 +1,343 @@
+<div class="canvas-container" [class.panning]="isPanning">
+  <!-- Canvas Header with Mini-map -->
+  <div class="canvas-header">
+    <div class="canvas-info">
+      <h3 class="flow-name">{{flow?.name || 'Untitled Flow'}}</h3>
+      <div class="canvas-stats">
+            <span class="stat-item">
+              <mat-icon>account_tree</mat-icon>
+              {{flow?.nodes?.length || 0}} nodes
+            </span>
+        <span class="stat-item">
+              <mat-icon>timeline</mat-icon>
+          {{flow?.connections?.length || 0}} connections
+            </span>
+      </div>
+    </div>
+
+    <div class="canvas-controls">
+      <div class="minimap-container" *ngIf="showMinimap">
+        <div class="minimap" #minimap>
+          <div class="minimap-viewport"
+               [style.transform]="'translate(' + minimapViewport.x + 'px, ' + minimapViewport.y + 'px)'"
+               [style.width.px]="minimapViewport.width"
+               [style.height.px]="minimapViewport.height">
+          </div>
+          <div class="minimap-node"
+               *ngFor="let node of flow?.nodes"
+               [style.left.px]="node.position.x * minimapScale"
+               [style.top.px]="node.position.y * minimapScale"
+               [class]="'mini-node-' + node.type">
+          </div>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <button mat-mini-fab color="primary" matTooltip="Zoom In" (click)="zoomIn()" [disabled]="zoomLevel >= maxZoom">
+          <mat-icon>zoom_in</mat-icon>
+        </button>
+        <div class="zoom-indicator">{{Math.round(zoomLevel * 100)}}%</div>
+        <button mat-mini-fab color="primary" matTooltip="Zoom Out" (click)="zoomOut()" [disabled]="zoomLevel <= minZoom">
+          <mat-icon>zoom_out</mat-icon>
+        </button>
+      </div>
+
+      <div class="control-group">
+        <button mat-mini-fab color="accent" matTooltip="Fit to Screen" (click)="fitToScreen()">
+          <mat-icon>fit_screen</mat-icon>
+        </button>
+        <button mat-mini-fab matTooltip="Center View" (click)="centerView()">
+          <mat-icon>center_focus_strong</mat-icon>
+        </button>
+        <button mat-mini-fab matTooltip="Toggle Minimap" (click)="toggleMinimap()">
+          <mat-icon>map</mat-icon>
+        </button>
+      </div>
+
+      <div class="control-group">
+        <button mat-mini-fab matTooltip="Auto Layout" (click)="autoLayout()">
+          <mat-icon>auto_awesome</mat-icon>
+        </button>
+        <button mat-mini-fab matTooltip="Validate Flow" (click)="validateFlow()">
+          <mat-icon>check_circle</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Canvas -->
+  <div class="canvas-wrapper"
+       #canvasWrapper
+       (wheel)="onWheel($event)"
+       (mousedown)="onCanvasMouseDown($event)"
+       (contextmenu)="onContextMenu($event)">
+
+    <div class="canvas"
+         #canvas
+         [style.transform]="'scale(' + zoomLevel + ') translate(' + panOffset.x + 'px, ' + panOffset.y + 'px)'"
+         [style.transform-origin]="'0 0'"
+         (drop)="onDrop($event)"
+         (dragover)="onDragOver($event)"
+         (click)="onCanvasClick($event)">
+
+      <!-- Grid Background -->
+      <div class="grid-background"
+           [style.background-size]="gridSize + 'px ' + gridSize + 'px'"
+           [style.opacity]="gridOpacity">
+      </div>
+
+      <!-- Connection Layer -->
+      <svg class="connections-layer"
+           [attr.width]="canvasWidth"
+           [attr.height]="canvasHeight"
+           [style.pointer-events]="'none'">
+        <defs>
+          <marker id="arrowhead" markerWidth="12" markerHeight="8"
+                  refX="11" refY="4" orient="auto" markerUnits="strokeWidth">
+            <polygon points="0 0, 12 4, 0 8" fill="var(--gray-600)" />
+          </marker>
+          <marker id="arrowhead-selected" markerWidth="12" markerHeight="8"
+                  refX="11" refY="4" orient="auto" markerUnits="strokeWidth">
+            <polygon points="0 0, 12 4, 0 8" fill="var(--primary-600)" />
+          </marker>
+          <filter id="connection-glow">
+            <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+            <feMerge>
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+
+        <!-- Connection Paths -->
+        <g class="connections-group" style="pointer-events: stroke;">
+          <path *ngFor="let connection of flow?.connections; trackBy: trackByConnectionId"
+                [attr.d]="getConnectionPath(connection)"
+                class="connection-path"
+                [class.selected]="selectedConnection === connection.id"
+                [class.highlighted]="highlightedConnection === connection.id"
+                [attr.stroke]="getConnectionColor(connection)"
+                [attr.stroke-width]="getConnectionWidth(connection)"
+                [attr.marker-end]="getConnectionMarker(connection)"
+                [attr.filter]="selectedConnection === connection.id ? 'url(#connection-glow)' : ''"
+                (click)="selectConnection(connection, $event)"
+                (mouseenter)="highlightConnection(connection.id)"
+                (mouseleave)="highlightConnection(null)"
+                fill="none">
+          </path>
+
+          <!-- Connection Labels -->
+          <g class="connection-labels" *ngIf="showConnectionLabels">
+            <text *ngFor="let connection of flow?.connections"
+                  [attr.x]="getConnectionLabelPosition(connection).x"
+                  [attr.y]="getConnectionLabelPosition(connection).y"
+                  class="connection-label"
+                  text-anchor="middle"
+                  dominant-baseline="middle">
+              {{connection.label || connection.condition}}
+            </text>
+          </g>
+        </g>
+      </svg>
+
+      <!-- Nodes Layer -->
+      <div class="nodes-layer">
+        <div *ngFor="let node of flow?.nodes; trackBy: trackByNodeId"
+             class="flow-node"
+             [class.selected]="selectedNode?.id === node.id"
+             [class.highlighted]="highlightedNode === node.id"
+             [class.dragging]="dragNode?.id === node.id"
+             [class.error]="nodeErrors[node.id]"
+             [class.warning]="nodeWarnings[node.id]"
+             [class]="'node-type-' + node.type"
+             [style.left.px]="node.position.x"
+             [style.top.px]="node.position.y"
+             [style.z-index]="selectedNode?.id === node.id ? 1000 : 10"
+             (click)="selectNode(node, $event)"
+             (mousedown)="startDrag(node, $event)"
+             (mouseenter)="highlightNode(node.id)"
+             (mouseleave)="highlightNode(null)"
+             [attr.data-node-id]="node.id"
+             matRipple>
+
+          <!-- Node Content -->
+          <div class="node-content">
+            <!-- Status Indicator -->
+            <div class="node-status" *ngIf="nodeErrors[node.id] || nodeWarnings[node.id]">
+              <mat-icon *ngIf="nodeErrors[node.id]" class="status-error">error</mat-icon>
+              <mat-icon *ngIf="nodeWarnings[node.id] && !nodeErrors[node.id]" class="status-warning">warning</mat-icon>
+            </div>
+
+            <!-- Node Header -->
+            <div class="node-header">
+              <div class="node-icon-container">
+                <mat-icon class="node-icon">{{getNodeIcon(node)}}</mat-icon>
+              </div>
+              <div class="node-info">
+                <div class="node-title">{{node.label}}</div>
+                <div class="node-subtitle" *ngIf="getNodeSubtitle(node)">{{getNodeSubtitle(node)}}</div>
+              </div>
+              <button mat-icon-button
+                      class="node-menu-button"
+                      [matMenuTriggerFor]="nodeMenu"
+                      (click)="$event.stopPropagation()"
+                      *ngIf="selectedNode?.id === node.id">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+            </div>
+
+            <!-- Node Body -->
+            <div class="node-body" *ngIf="getNodeBodyContent(node)">
+              <div class="node-description">{{getNodeBodyContent(node)}}</div>
+            </div>
+
+            <!-- Node Footer -->
+            <div class="node-footer" *ngIf="getNodeStats(node)">
+              <div class="node-stats">
+                    <span class="stat" *ngFor="let stat of getNodeStats(node)">
+                      <mat-icon>{{stat.icon}}</mat-icon>
+                      <span>{{stat.value}}</span>
+                    </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Connection Points -->
+          <div class="connection-points" *ngIf="showConnectionPoints || selectedNode?.id === node.id">
+            <!-- Input Connection Point -->
+            <div class="connection-point input"
+                 *ngIf="canHaveInputConnection(node)"
+                 (mousedown)="startConnection(node, 'input', $event)"
+                 [class.active]="isConnectionPointActive(node, 'input')"
+                 matTooltip="Input">
+              <div class="connection-dot"></div>
+            </div>
+
+            <!-- Output Connection Points -->
+            <div class="connection-point output"
+                 *ngFor="let output of getOutputConnectionPoints(node); let i = index"
+                 (mousedown)="startConnection(node, 'output', $event, i)"
+                 [class.active]="isConnectionPointActive(node, 'output', i)"
+                 [style.right.px]="-6"
+                 [style.top.px]="getOutputConnectionPosition(node, i)"
+                 [matTooltip]="output.label || 'Output'">
+              <div class="connection-dot"></div>
+            </div>
+          </div>
+
+          <!-- Node Menu -->
+          <mat-menu #nodeMenu="matMenu" class="node-context-menu">
+            <button mat-menu-item (click)="editNode(node)">
+              <mat-icon>edit</mat-icon>
+              <span>Edit Properties</span>
+            </button>
+            <button mat-menu-item (click)="duplicateNode(node)">
+              <mat-icon>content_copy</mat-icon>
+              <span>Duplicate</span>
+            </button>
+            <button mat-menu-item (click)="copyNode(node)">
+              <mat-icon>copy</mat-icon>
+              <span>Copy</span>
+            </button>
+            <mat-divider></mat-divider>
+            <button mat-menu-item (click)="addNoteToNode(node)">
+              <mat-icon>note_add</mat-icon>
+              <span>Add Note</span>
+            </button>
+            <button mat-menu-item (click)="toggleNodeCollapse(node)">
+              <mat-icon>{{node.collapsed ? 'expand_more' : 'expand_less'}}</mat-icon>
+              <span>{{node.collapsed ? 'Expand' : 'Collapse'}}</span>
+            </button>
+            <mat-divider></mat-divider>
+            <button mat-menu-item (click)="deleteNode(node)" class="delete-item">
+              <mat-icon>delete</mat-icon>
+              <span>Delete</span>
+            </button>
+          </mat-menu>
+        </div>
+      </div>
+
+      <!-- Temporary Connection Line -->
+      <svg class="temp-connection"
+           *ngIf="tempConnection"
+           [attr.width]="canvasWidth"
+           [attr.height]="canvasHeight"
+           style="pointer-events: none;">
+        <path [attr.d]="getTempConnectionPath()"
+              stroke="var(--primary-500)"
+              stroke-width="3"
+              stroke-dasharray="8,4"
+              fill="none"
+              opacity="0.7">
+          <animate attributeName="stroke-dashoffset"
+                   values="0;12;0"
+                   dur="1s"
+                   repeatCount="indefinite"/>
+        </path>
+      </svg>
+
+      <!-- Selection Rectangle -->
+      <div class="selection-rectangle"
+           *ngIf="selectionRect"
+           [style.left.px]="selectionRect.x"
+           [style.top.px]="selectionRect.y"
+           [style.width.px]="selectionRect.width"
+           [style.height.px]="selectionRect.height">
+      </div>
+
+      <!-- Drop Zone Indicator -->
+      <div class="drop-zone-indicator"
+           *ngIf="showDropZone"
+           [style.left.px]="dropZone.x - 75"
+           [style.top.px]="dropZone.y - 30">
+        <mat-icon>add_circle</mat-icon>
+        <span>Drop here to add node</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Context Menu -->
+  <div class="context-menu"
+       *ngIf="contextMenu.show"
+       [style.left.px]="contextMenu.x"
+       [style.top.px]="contextMenu.y"
+       (click)="$event.stopPropagation()">
+    <mat-list dense>
+      <mat-list-item (click)="pasteNode()" [disabled]="!hasClipboardContent()">
+        <mat-icon matListItemIcon>paste</mat-icon>
+        <span matListItemTitle>Paste</span>
+      </mat-list-item>
+      <mat-list-item (click)="selectAll()">
+        <mat-icon matListItemIcon>select_all</mat-icon>
+        <span matListItemTitle>Select All</span>
+      </mat-list-item>
+      <mat-divider></mat-divider>
+      <mat-list-item (click)="addNote()">
+        <mat-icon matListItemIcon>sticky_note_2</mat-icon>
+        <span matListItemTitle>Add Note</span>
+      </mat-list-item>
+    </mat-list>
+  </div>
+
+  <!-- Validation Issues Panel -->
+  <div class="validation-panel" *ngIf="showValidationPanel && validationIssues.length > 0">
+    <div class="validation-header">
+      <h4>Validation Issues</h4>
+      <button mat-icon-button (click)="showValidationPanel = false">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <div class="validation-content">
+      <div class="validation-issue"
+           *ngFor="let issue of validationIssues"
+           [class]="issue.type"
+           (click)="focusOnNode(issue.nodeId)">
+        <mat-icon>{{issue.type === 'error' ? 'error' : 'warning'}}</mat-icon>
+        <div class="issue-content">
+          <div class="issue-title">{{issue.title}}</div>
+          <div class="issue-description">{{issue.description}}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

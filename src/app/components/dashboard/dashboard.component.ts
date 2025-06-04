@@ -1,5 +1,5 @@
-// components/dashboard/dashboard.component.ts
-import { Component, OnInit } from '@angular/core';
+// components/dashboard/dashboard.component.ts - Enhanced with modern UI/UX
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -9,259 +9,43 @@ import { Page } from '../../models/flow.model';
 
 @Component({
   selector: 'app-dashboard',
-  template: `
-    <div class="dashboard-container">
-      <mat-toolbar color="primary" class="dashboard-toolbar">
-        <span>Service Flow Designer</span>
-        <span class="spacer"></span>
-        <button mat-icon-button [matMenuTriggerFor]="menu">
-          <mat-icon>account_circle</mat-icon>
-        </button>
-        <mat-menu #menu="matMenu">
-          <button mat-menu-item (click)="logout()">
-            <mat-icon>exit_to_app</mat-icon>
-            <span>Logout</span>
-          </button>
-        </mat-menu>
-      </mat-toolbar>
-
-      <div class="dashboard-content">
-        <div class="header-section">
-          <h1>Dashboard</h1>
-          <div class="action-buttons">
-            <button mat-raised-button color="primary" (click)="createNewFlow()">
-              <mat-icon>add</mat-icon>
-              New Flow
-            </button>
-            <button mat-stroked-button (click)="refreshData()">
-              <mat-icon>refresh</mat-icon>
-              Refresh
-            </button>
-          </div>
-        </div>
-
-        <div class="stats-section" *ngIf="statistics">
-          <mat-card class="stat-card">
-            <mat-card-header>
-              <mat-icon mat-card-avatar class="stat-icon pages">description</mat-icon>
-              <mat-card-title>{{statistics.pages?.total || 0}}</mat-card-title>
-              <mat-card-subtitle>Total Pages</mat-card-subtitle>
-            </mat-card-header>
-          </mat-card>
-
-          <mat-card class="stat-card">
-            <mat-card-header>
-              <mat-icon mat-card-avatar class="stat-icon fields">input</mat-icon>
-              <mat-card-title>{{statistics.fields?.total || 0}}</mat-card-title>
-              <mat-card-subtitle>Total Fields</mat-card-subtitle>
-            </mat-card-header>
-          </mat-card>
-
-          <mat-card class="stat-card">
-            <mat-card-header>
-              <mat-icon mat-card-avatar class="stat-icon conditions">rule</mat-icon>
-              <mat-card-title>{{statistics.conditions?.total || 0}}</mat-card-title>
-              <mat-card-subtitle>Conditions</mat-card-subtitle>
-            </mat-card-header>
-          </mat-card>
-
-          <mat-card class="stat-card">
-            <mat-card-header>
-              <mat-icon mat-card-avatar class="stat-icon categories">category</mat-icon>
-              <mat-card-title>{{statistics.categories?.total || 0}}</mat-card-title>
-              <mat-card-subtitle>Categories</mat-card-subtitle>
-            </mat-card-header>
-          </mat-card>
-        </div>
-
-        <div class="pages-section">
-          <h2>Recent Pages</h2>
-          <div class="pages-grid" *ngIf="pages.length > 0; else noPages">
-            <mat-card class="page-card" *ngFor="let page of pages" (click)="editPage(page)">
-              <mat-card-header>
-                <mat-icon mat-card-avatar>description</mat-icon>
-                <mat-card-title>{{page.name}}</mat-card-title>
-                <mat-card-subtitle>{{page.service_name}}</mat-card-subtitle>
-              </mat-card-header>
-              <mat-card-content>
-                <p>{{page.description}}</p>
-                <div class="page-meta">
-                  <span class="status" [class.active]="page.active_ind">
-                    {{page.active_ind ? 'Active' : 'Inactive'}}
-                  </span>
-                  <span class="sequence">Step: {{page.sequence_number_name}}</span>
-                </div>
-              </mat-card-content>
-              <mat-card-actions>
-                <button mat-button color="primary" (click)="editPage(page); $event.stopPropagation()">
-                  <mat-icon>edit</mat-icon>
-                  Edit
-                </button>
-                <button mat-button (click)="viewPageSchema(page); $event.stopPropagation()">
-                  <mat-icon>visibility</mat-icon>
-                  View
-                </button>
-              </mat-card-actions>
-            </mat-card>
-          </div>
-
-          <ng-template #noPages>
-            <div class="empty-state">
-              <mat-icon class="empty-icon">description</mat-icon>
-              <h3>No pages found</h3>
-              <p>Create your first service flow to get started</p>
-              <button mat-raised-button color="primary" (click)="createNewFlow()">
-                <mat-icon>add</mat-icon>
-                Create New Flow
-              </button>
-            </div>
-          </ng-template>
-        </div>
-      </div>
-    </div>
-  `,
-  styles: [`
-    .dashboard-container {
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .dashboard-toolbar {
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-    }
-
-    .spacer {
-      flex: 1 1 auto;
-    }
-
-    .dashboard-content {
-      flex: 1;
-      padding: 24px;
-      overflow-y: auto;
-      background-color: #f5f5f5;
-    }
-
-    .header-section {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 32px;
-    }
-
-    .header-section h1 {
-      margin: 0;
-      color: #333;
-    }
-
-    .action-buttons {
-      display: flex;
-      gap: 12px;
-    }
-
-    .stats-section {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px;
-      margin-bottom: 32px;
-    }
-
-    .stat-card {
-      transition: transform 0.2s ease-in-out;
-    }
-
-    .stat-card:hover {
-      transform: translateY(-2px);
-    }
-
-    .stat-icon {
-      border-radius: 50%;
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .stat-icon.pages { background-color: #2196F3; }
-    .stat-icon.fields { background-color: #4CAF50; }
-    .stat-icon.conditions { background-color: #FF9800; }
-    .stat-icon.categories { background-color: #9C27B0; }
-
-    .pages-section h2 {
-      color: #333;
-      margin-bottom: 16px;
-    }
-
-    .pages-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 16px;
-    }
-
-    .page-card {
-      cursor: pointer;
-      transition: all 0.2s ease-in-out;
-    }
-
-    .page-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 16px rgba(0,0,0,0.15);
-    }
-
-    .page-meta {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 8px;
-    }
-
-    .status {
-      padding: 4px 8px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: 500;
-      background-color: #f44336;
-      color: white;
-    }
-
-    .status.active {
-      background-color: #4CAF50;
-    }
-
-    .sequence {
-      color: #666;
-      font-size: 12px;
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 64px 16px;
-      color: #666;
-    }
-
-    .empty-icon {
-      font-size: 64px;
-      height: 64px;
-      width: 64px;
-      color: #ccc;
-      margin-bottom: 16px;
-    }
-
-    .empty-state h3 {
-      margin: 16px 0 8px 0;
-    }
-
-    .empty-state p {
-      margin-bottom: 24px;
-    }
-  `]
+  templateUrl: './dashboard.component.html',
+  styleUrls: ['dashboard.component.scss']
 })
 export class DashboardComponent implements OnInit {
   pages: Page[] = [];
+  filteredPages: Page[] = [];
   statistics: any = null;
   loading = false;
+  searchTerm = '';
+  statusFilter = '';
+  viewMode: 'grid' | 'list' = 'grid';
+  notificationCount = 3;
+  currentUser: any = { name: 'John Doe', email: 'john.doe@example.com' };
+
+  recentActivities = [
+    {
+      type: 'create',
+      icon: 'add_circle',
+      title: 'New flow created',
+      description: 'Driver License Application flow was created',
+      time: '2 minutes ago'
+    },
+    {
+      type: 'edit',
+      icon: 'edit',
+      title: 'Flow updated',
+      description: 'Business Registration form was modified',
+      time: '1 hour ago'
+    },
+    {
+      type: 'share',
+      icon: 'share',
+      title: 'Flow shared',
+      description: 'Permit Application shared with team',
+      time: '3 hours ago'
+    }
+  ];
 
   constructor(
     private router: Router,
@@ -272,18 +56,23 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadData();
+    this.currentUser = this.authService.currentUserValue || this.currentUser;
   }
 
   loadData(): void {
     this.loading = true;
 
     // Load pages
-    this.apiService.getPages({ page_size: 20 }).subscribe({
+    this.apiService.getPages({ page_size: 50 }).subscribe({
       next: (response) => {
         this.pages = response.results || response;
+        this.filterPages();
       },
       error: (error) => {
-        this.snackBar.open('Failed to load pages', 'Close', { duration: 3000 });
+        this.snackBar.open('Failed to load pages', 'Close', {
+          duration: 3000,
+          panelClass: ['error-snackbar']
+        });
       }
     });
 
@@ -295,14 +84,45 @@ export class DashboardComponent implements OnInit {
       },
       error: (error) => {
         this.loading = false;
-        this.snackBar.open('Failed to load statistics', 'Close', { duration: 3000 });
+        this.snackBar.open('Failed to load statistics', 'Close', {
+          duration: 3000,
+          panelClass: ['error-snackbar']
+        });
       }
     });
   }
 
+  filterPages(): void {
+    let filtered = [...this.pages];
+
+    // Apply search filter
+    if (this.searchTerm) {
+      const term = this.searchTerm.toLowerCase();
+      filtered = filtered.filter(page =>
+        page.name.toLowerCase().includes(term) ||
+        page.service_name.toLowerCase().includes(term) ||
+        page.description.toLowerCase().includes(term)
+      );
+    }
+
+    // Apply status filter
+    if (this.statusFilter) {
+      filtered = filtered.filter(page => {
+        if (this.statusFilter === 'active') return page.active_ind;
+        if (this.statusFilter === 'inactive') return !page.active_ind;
+        return true;
+      });
+    }
+
+    this.filteredPages = filtered;
+  }
+
   refreshData(): void {
     this.loadData();
-    this.snackBar.open('Data refreshed', 'Close', { duration: 2000 });
+    this.snackBar.open('Data refreshed successfully', 'Close', {
+      duration: 2000,
+      panelClass: ['success-snackbar']
+    });
   }
 
   createNewFlow(): void {
@@ -313,20 +133,149 @@ export class DashboardComponent implements OnInit {
     this.router.navigate(['/designer', page.id]);
   }
 
+  duplicatePage(page: Page): void {
+    this.snackBar.open(`Duplicating "${page.name}"...`, 'Close', {
+      duration: 2000,
+      panelClass: ['info-snackbar']
+    });
+    // Implement duplication logic
+  }
+
+  exportPage(page: Page): void {
+    this.apiService.exportForm(page.id).subscribe({
+      next: (data) => {
+        // Create download
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${page.name.replace(/\s+/g, '-')}.json`;
+        link.click();
+        window.URL.revokeObjectURL(url);
+
+        this.snackBar.open('Flow exported successfully', 'Close', {
+          duration: 3000,
+          panelClass: ['success-snackbar']
+        });
+      },
+      error: () => {
+        this.snackBar.open('Failed to export flow', 'Close', {
+          duration: 3000,
+          panelClass: ['error-snackbar']
+        });
+      }
+    });
+  }
+
+  deletePage(page: Page): void {
+    if (confirm(`Are you sure you want to delete "${page.name}"?`)) {
+      this.apiService.deletePage(page.id).subscribe({
+        next: () => {
+          this.pages = this.pages.filter(p => p.id !== page.id);
+          this.filterPages();
+          this.snackBar.open('Flow deleted successfully', 'Close', {
+            duration: 3000,
+            panelClass: ['success-snackbar']
+          });
+        },
+        error: () => {
+          this.snackBar.open('Failed to delete flow', 'Close', {
+            duration: 3000,
+            panelClass: ['error-snackbar']
+          });
+        }
+      });
+    }
+  }
+
   viewPageSchema(page: Page): void {
     this.apiService.getFormSchema(page.id).subscribe({
       next: (schema) => {
         console.log('Page Schema:', schema);
-        this.snackBar.open('Schema loaded in console', 'Close', { duration: 3000 });
+        this.snackBar.open('Schema loaded (check console)', 'Close', {
+          duration: 3000,
+          panelClass: ['info-snackbar']
+        });
       },
-      error: (error) => {
-        this.snackBar.open('Failed to load schema', 'Close', { duration: 3000 });
+      error: () => {
+        this.snackBar.open('Failed to load schema', 'Close', {
+          duration: 3000,
+          panelClass: ['error-snackbar']
+        });
       }
     });
+  }
+
+  importFlow(): void {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = (event: any) => {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e: any) => {
+          try {
+            const flowData = JSON.parse(e.target.result);
+            this.apiService.importForm(flowData).subscribe({
+              next: () => {
+                this.loadData();
+                this.snackBar.open('Flow imported successfully', 'Close', {
+                  duration: 3000,
+                  panelClass: ['success-snackbar']
+                });
+              },
+              error: () => {
+                this.snackBar.open('Failed to import flow', 'Close', {
+                  duration: 3000,
+                  panelClass: ['error-snackbar']
+                });
+              }
+            });
+          } catch (error) {
+            this.snackBar.open('Invalid flow file', 'Close', {
+              duration: 3000,
+              panelClass: ['error-snackbar']
+            });
+          }
+        };
+        reader.readAsText(file);
+      }
+    };
+    input.click();
+  }
+
+  clearSearch(): void {
+    this.searchTerm = '';
+    this.filterPages();
+  }
+
+  getPageIcon(page: Page): string {
+    // Return icon based on page type or service
+    const iconMap: { [key: string]: string } = {
+      'Driver License': 'directions_car',
+      'Business Registration': 'business',
+      'Permit Application': 'assignment',
+      'default': 'description'
+    };
+    return iconMap[page.service_name] || iconMap['default'];
+  }
+
+  getRelativeTime(date: string): string {
+    // Mock implementation - implement proper relative time
+    return 'Yesterday';
+  }
+
+  trackByPageId(index: number, page: Page): number {
+    return page.id;
   }
 
   logout(): void {
     this.authService.logout();
     this.router.navigate(['/login']);
+    this.snackBar.open('Logged out successfully', 'Close', {
+      duration: 2000,
+      panelClass: ['info-snackbar']
+    });
   }
 }

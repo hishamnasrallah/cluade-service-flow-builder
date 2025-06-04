@@ -5,59 +5,8 @@ import { FlowNode } from '../../models/flow.model';
 
 @Component({
   selector: 'app-node-dialog',
-  template: `
-    <h2 mat-dialog-title>{{data.title}}</h2>
-
-    <mat-dialog-content>
-      <div class="dialog-content">
-        <p>{{data.message}}</p>
-
-        <div *ngIf="data.node" class="node-details">
-          <h4>Node Details:</h4>
-          <div class="detail-row">
-            <strong>ID:</strong> {{data.node?.id || 'N/A'}}
-          </div>
-          <div class="detail-row">
-            <strong>Type:</strong> {{data.node?.type || 'N/A'}}
-          </div>
-          <div class="detail-row">
-            <strong>Label:</strong> {{data.node?.label || 'N/A'}}
-          </div>
-          <div class="detail-row">
-            <strong>Position:</strong> ({{data.node?.position?.x || 0}}, {{data.node?.position?.y || 0}})
-          </div>
-        </div>
-      </div>
-    </mat-dialog-content>
-
-    <mat-dialog-actions align="end">
-      <button mat-button (click)="onCancel()">Cancel</button>
-      <button mat-raised-button color="primary" (click)="onConfirm()" *ngIf="data.showConfirm">
-        {{data.confirmText || 'Confirm'}}
-      </button>
-    </mat-dialog-actions>
-  `,
-  styles: [`
-    .dialog-content {
-      min-width: 300px;
-      padding: 16px 0;
-    }
-
-    .node-details {
-      margin-top: 16px;
-      padding: 16px;
-      background-color: #f5f5f5;
-      border-radius: 4px;
-    }
-
-    .detail-row {
-      margin-bottom: 8px;
-    }
-
-    .detail-row:last-child {
-      margin-bottom: 0;
-    }
-  `]
+  templateUrl: 'node-dialog.component.html',
+  styleUrls: ['node-dialog.component.scss']
 })
 export class NodeDialogComponent {
   constructor(

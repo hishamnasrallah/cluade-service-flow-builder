@@ -43,6 +43,9 @@ import { FlowService } from './services/flow.service';
 // Guards and Interceptors
 import { AuthInterceptor } from './interceptors/auth.interceptor';
 import { AuthGuard } from './guards/auth.guard';
+import {MatButtonToggle, MatButtonToggleGroup} from "@angular/material/button-toggle";
+import {MatBadge} from "@angular/material/badge";
+import {MatChipListbox, MatChipOption} from "@angular/material/chips";
 
 @NgModule({
   declarations: [
@@ -62,12 +65,12 @@ import { AuthGuard } from './guards/auth.guard';
     FormsModule,
     ReactiveFormsModule,
     RouterModule.forRoot([
-      { path: 'login', component: LoginComponent },
-      { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard] },
-      { path: 'designer/:id', component: FlowDesignerComponent, canActivate: [AuthGuard] },
-      { path: 'designer', component: FlowDesignerComponent, canActivate: [AuthGuard] },
-      { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
-      { path: '**', redirectTo: '/dashboard' }
+      {path: 'login', component: LoginComponent},
+      {path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard]},
+      {path: 'designer/:id', component: FlowDesignerComponent, canActivate: [AuthGuard]},
+      {path: 'designer', component: FlowDesignerComponent, canActivate: [AuthGuard]},
+      {path: '', redirectTo: '/dashboard', pathMatch: 'full'},
+      {path: '**', redirectTo: '/dashboard'}
     ]),
 
     // Material Modules
@@ -88,7 +91,12 @@ import { AuthGuard } from './guards/auth.guard';
     MatExpansionModule,
     MatMenuModule,
     MatTooltipModule,
-    MatSlideToggleModule
+    MatSlideToggleModule,
+    MatButtonToggle,
+    MatBadge,
+    MatButtonToggleGroup,
+    MatChipListbox,
+    MatChipOption
   ],
   providers: [
     AuthService,

@@ -1,0 +1,65 @@
+<div class="flow-designer-container">
+  <!-- Toolbar -->
+  <mat-toolbar class="designer-toolbar">
+    <button mat-icon-button routerLink="/dashboard">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <span class="flow-title">{{currentFlow?.name || 'New Flow'}}</span>
+    <span class="spacer"></span>
+
+    <div class="toolbar-actions">
+      <button mat-icon-button matTooltip="Save Flow" (click)="saveFlow()">
+        <mat-icon>save</mat-icon>
+      </button>
+      <button mat-icon-button matTooltip="Export Flow" (click)="exportFlow()">
+        <mat-icon>download</mat-icon>
+      </button>
+      <button mat-icon-button matTooltip="Import Flow" (click)="importFlow()">
+        <mat-icon>upload</mat-icon>
+      </button>
+      <button mat-icon-button matTooltip="Zoom In" (click)="zoomIn()">
+        <mat-icon>zoom_in</mat-icon>
+      </button>
+      <button mat-icon-button matTooltip="Zoom Out" (click)="zoomOut()">
+        <mat-icon>zoom_out</mat-icon>
+      </button>
+      <button mat-icon-button matTooltip="Fit to Screen" (click)="fitToScreen()">
+        <mat-icon>fit_screen</mat-icon>
+      </button>
+    </div>
+  </mat-toolbar>
+
+  <!-- Main Content -->
+  <div class="designer-content">
+    <!-- Toolbox -->
+    <div class="toolbox-panel">
+      <app-toolbox (nodeDropped)="onNodeDropped($event)"></app-toolbox>
+    </div>
+
+    <!-- Canvas -->
+    <div class="canvas-container">
+      <app-flow-canvas
+        [flow]="currentFlow"
+        (nodeSelected)="onNodeSelected($event)"
+        (nodeDeleted)="onNodeDeleted($event)"
+        (connectionCreated)="onConnectionCreated($event)"
+        (canvasUpdated)="onCanvasUpdated($event)">
+      </app-flow-canvas>
+    </div>
+
+    <!-- Properties Panel -->
+    <div class="properties-panel" *ngIf="selectedNode">
+      <app-properties-panel
+        [node]="selectedNode"
+        (nodeUpdated)="onNodeUpdated($event)">
+      </app-properties-panel>
+    </div>
+  </div>
+
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <span>Nodes: {{currentFlow?.nodes?.length || 0}}</span>
+    <span>Connections: {{currentFlow?.connections?.length || 0}}</span>
+    <span>Zoom: {{zoomLevel}}%</span>
+  </div>
+</div>

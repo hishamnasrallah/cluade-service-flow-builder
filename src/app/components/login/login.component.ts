@@ -1,4 +1,4 @@
-// components/login/login.component.ts
+// components/login/login.component.ts - Enhanced with modern UI/UX
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -7,111 +7,15 @@ import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login',
-  template: `
-    <div class="login-container">
-      <div class="login-card">
-        <div class="login-header">
-          <h1>Service Flow Designer</h1>
-          <p>Sign in to your account</p>
-        </div>
-
-        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Username</mat-label>
-            <input matInput formControlName="username" required>
-            <mat-icon matSuffix>person</mat-icon>
-            <mat-error *ngIf="loginForm.get('username')?.hasError('required')">
-              Username is required
-            </mat-error>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Password</mat-label>
-            <input matInput type="password" formControlName="password" required>
-            <mat-icon matSuffix>lock</mat-icon>
-            <mat-error *ngIf="loginForm.get('password')?.hasError('required')">
-              Password is required
-            </mat-error>
-          </mat-form-field>
-
-          <button
-            mat-raised-button
-            color="primary"
-            type="submit"
-            class="full-width login-button"
-            [disabled]="loginForm.invalid || loading">
-            <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
-            <span *ngIf="!loading">Sign In</span>
-          </button>
-        </form>
-
-        <div class="login-footer">
-          <p>Don't have an account? Contact administrator</p>
-        </div>
-      </div>
-    </div>
-  `,
-  styles: [`
-    .login-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      padding: 20px;
-    }
-
-    .login-card {
-      background: white;
-      border-radius: 16px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-      padding: 40px;
-      width: 100%;
-      max-width: 400px;
-      text-align: center;
-    }
-
-    .login-header h1 {
-      color: #333;
-      margin: 0 0 8px 0;
-      font-weight: 600;
-    }
-
-    .login-header p {
-      color: #666;
-      margin: 0 0 32px 0;
-    }
-
-    .login-form {
-      width: 100%;
-    }
-
-    .full-width {
-      width: 100%;
-      margin-bottom: 16px;
-    }
-
-    .login-button {
-      height: 48px;
-      font-size: 16px;
-      font-weight: 500;
-      margin-top: 16px;
-    }
-
-    .login-footer {
-      margin-top: 24px;
-      color: #666;
-      font-size: 14px;
-    }
-
-    .mat-spinner {
-      margin-right: 8px;
-    }
-  `]
+  templateUrl: './login.component.html',
+  styleUrl: 'login.component.scss'
 })
 export class LoginComponent implements OnInit {
   loginForm: FormGroup;
   loading = false;
+  hidePassword = true;
+  submitAttempted = false;
+  production = false; // Set based on environment
 
   constructor(
     private formBuilder: FormBuilder,
@@ -120,8 +24,9 @@ export class LoginComponent implements OnInit {
     private snackBar: MatSnackBar
   ) {
     this.loginForm = this.formBuilder.group({
-      username: ['', Validators.required],
-      password: ['', Validators.required]
+      username: ['', [Validators.required, Validators.minLength(3)]],
+      password: ['', [Validators.required, Validators.minLength(6)]],
+      rememberMe: [false]
     });
   }
 
@@ -130,26 +35,117 @@ export class LoginComponent implements OnInit {
     if (this.authService.isAuthenticated()) {
       this.router.navigate(['/dashboard']);
     }
+
+    // Add keyboard shortcuts
+    document.addEventListener('keydown', (event) => {
+      if (event.ctrlKey && event.key === 'Enter') {
+        this.onSubmit();
+      }
+    });
   }
 
   onSubmit(): void {
+    this.submitAttempted = true;
+
     if (this.loginForm.invalid) {
+      this.markFormGroupTouched();
+      this.showValidationErrors();
       return;
     }
 
     this.loading = true;
-    const { username, password } = this.loginForm.value;
+    const { username, password, rememberMe } = this.loginForm.value;
 
     this.authService.login(username, password).subscribe({
       next: (response) => {
         this.loading = false;
+
+        if (rememberMe) {
+          localStorage.setItem('rememberMe', 'true');
+        }
+
         this.router.navigate(['/dashboard']);
-        this.snackBar.open('Login successful!', 'Close', { duration: 3000 });
+        this.snackBar.open('Welcome back!', 'Close', {
+          duration: 3000,
+          panelClass: ['success-snackbar']
+        });
       },
       error: (error) => {
         this.loading = false;
-        this.snackBar.open('Login failed. Please check your credentials.', 'Close', { duration: 5000 });
+        this.handleLoginError(error);
       }
     });
+  }
+
+  fillDemoCredentials(type: 'admin' | 'user'): void {
+    const credentials = {
+      admin: { username: 'admin', password: 'admin123' },
+      user: { username: 'demo', password: 'demo123' }
+    };
+
+    this.loginForm.patchValue(credentials[type]);
+
+    this.snackBar.open(`${type} credentials filled`, 'Close', {
+      duration: 2000,
+      panelClass: ['info-snackbar']
+    });
+  }
+
+  forgotPassword(): void {
+    this.snackBar.open('Please contact your administrator for password reset', 'Close', {
+      duration: 5000,
+      panelClass: ['info-snackbar']
+    });
+  }
+
+  private markFormGroupTouched(): void {
+    Object.keys(this.loginForm.controls).forEach(key => {
+      const control = this.loginForm.get(key);
+      control?.markAsTouched();
+    });
+  }
+
+  private showValidationErrors(): void {
+    const errors = [];
+
+    if (this.loginForm.get('username')?.hasError('required')) {
+      errors.push('Username is required');
+    }
+    if (this.loginForm.get('password')?.hasError('required')) {
+      errors.push('Password is required');
+    }
+
+    if (errors.length > 0) {
+      this.snackBar.open(errors.join(', '), 'Close', {
+        duration: 4000,
+        panelClass: ['error-snackbar']
+      });
+    }
+  }
+
+  private handleLoginError(error: any): void {
+    let message = 'Login failed. Please try again.';
+
+    if (error.status === 401) {
+      message = 'Invalid username or password.';
+    } else if (error.status === 403) {
+      message = 'Account is disabled. Contact administrator.';
+    } else if (error.status === 429) {
+      message = 'Too many login attempts. Please try again later.';
+    } else if (error.status === 0) {
+      message = 'Unable to connect to server. Check your connection.';
+    }
+
+    this.snackBar.open(message, 'Close', {
+      duration: 5000,
+      panelClass: ['error-snackbar']
+    });
+
+    // Add shake animation to form
+    const formElement = document.querySelector('.login-form');
+    formElement?.classList.add('shake');
+    setTimeout(() => {
+      formElement?.classList.remove('shake');
+    }, 500);
   }
 }

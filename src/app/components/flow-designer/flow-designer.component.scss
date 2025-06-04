@@ -1,0 +1,64 @@
+.flow-designer-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f5f5f5;
+}
+
+.designer-toolbar {
+  background-color: #2c3e50;
+  color: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.flow-title {
+  font-size: 18px;
+  font-weight: 500;
+  margin-left: 16px;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.toolbar-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.designer-content {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.toolbox-panel {
+  width: 300px;
+  background-color: white;
+  border-right: 1px solid #e0e0e0;
+  box-shadow: 2px 0 4px rgba(0,0,0,0.1);
+}
+
+.canvas-container {
+  flex: 1;
+  position: relative;
+  background-color: #fafafa;
+}
+
+.properties-panel {
+  width: 350px;
+  background-color: white;
+  border-left: 1px solid #e0e0e0;
+  box-shadow: -2px 0 4px rgba(0,0,0,0.1);
+}
+
+.status-bar {
+  height: 32px;
+  background-color: #34495e;
+  color: white;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 24px;
+  font-size: 12px;
+}
