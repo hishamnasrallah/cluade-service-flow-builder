@@ -1,65 +1,108 @@
+<!-- src/app/components/flow-designer/flow-designer.component.html - FIXED VERSION -->
 <div class="flow-designer-container">
-  <!-- Toolbar -->
-  <mat-toolbar class="designer-toolbar">
-    <button mat-icon-button routerLink="/dashboard">
-      <mat-icon>arrow_back</mat-icon>
-    </button>
-    <span class="flow-title">{{currentFlow?.name || 'New Flow'}}</span>
-    <span class="spacer"></span>
+  <!-- Top Toolbar -->
+  <header class="designer-toolbar">
+    <div class="toolbar-left">
+      <button mat-icon-button routerLink="/dashboard" matTooltip="Back to Dashboard">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div class="flow-info">
+        <h2 class="flow-title">{{currentFlow?.name || 'New Flow'}}</h2>
+        <span class="flow-status" *ngIf="currentFlow">
+          {{currentFlow.nodes?.length || 0}} nodes, {{currentFlow.connections?.length || 0}} connections
+        </span>
+      </div>
+    </div>
 
     <div class="toolbar-actions">
-      <button mat-icon-button matTooltip="Save Flow" (click)="saveFlow()">
+      <button mat-button (click)="saveFlow()" class="save-btn">
         <mat-icon>save</mat-icon>
+        Save
       </button>
-      <button mat-icon-button matTooltip="Export Flow" (click)="exportFlow()">
-        <mat-icon>download</mat-icon>
+      <button mat-stroked-button [matMenuTriggerFor]="fileMenu">
+        <mat-icon>more_horiz</mat-icon>
+        More
       </button>
-      <button mat-icon-button matTooltip="Import Flow" (click)="importFlow()">
-        <mat-icon>upload</mat-icon>
-      </button>
-      <button mat-icon-button matTooltip="Zoom In" (click)="zoomIn()">
-        <mat-icon>zoom_in</mat-icon>
-      </button>
-      <button mat-icon-button matTooltip="Zoom Out" (click)="zoomOut()">
-        <mat-icon>zoom_out</mat-icon>
-      </button>
-      <button mat-icon-button matTooltip="Fit to Screen" (click)="fitToScreen()">
-        <mat-icon>fit_screen</mat-icon>
-      </button>
-    </div>
-  </mat-toolbar>
 
-  <!-- Main Content -->
-  <div class="designer-content">
-    <!-- Toolbox -->
-    <div class="toolbox-panel">
+      <!-- File Menu -->
+      <mat-menu #fileMenu="matMenu">
+        <button mat-menu-item (click)="exportFlow()">
+          <mat-icon>download</mat-icon>
+          <span>Export Flow</span>
+        </button>
+        <button mat-menu-item (click)="importFlow()">
+          <mat-icon>upload</mat-icon>
+          <span>Import Flow</span>
+        </button>
+        <mat-divider></mat-divider>
+        <button mat-menu-item (click)="validateFlow()">
+          <mat-icon>check_circle</mat-icon>
+          <span>Validate Flow</span>
+        </button>
+        <button mat-menu-item (click)="previewFlow()">
+          <mat-icon>visibility</mat-icon>
+          <span>Preview Flow</span>
+        </button>
+      </mat-menu>
+    </div>
+  </header>
+
+  <!-- Main Designer Area -->
+  <div class="designer-main">
+    <!-- Left Panel - Toolbox -->
+    <aside class="toolbox-panel">
       <app-toolbox (nodeDropped)="onNodeDropped($event)"></app-toolbox>
-    </div>
+    </aside>
 
-    <!-- Canvas -->
-    <div class="canvas-container">
+    <!-- Center - Canvas -->
+    <main class="canvas-area">
       <app-flow-canvas
         [flow]="currentFlow"
         (nodeSelected)="onNodeSelected($event)"
         (nodeDeleted)="onNodeDeleted($event)"
+        (nodeUpdated)="onNodeUpdated($event)"
         (connectionCreated)="onConnectionCreated($event)"
         (canvasUpdated)="onCanvasUpdated($event)">
       </app-flow-canvas>
-    </div>
+    </main>
 
-    <!-- Properties Panel -->
-    <div class="properties-panel" *ngIf="selectedNode">
+    <!-- Right Panel - Properties (only show when node selected) -->
+    <aside class="properties-panel" *ngIf="selectedNode">
       <app-properties-panel
         [node]="selectedNode"
-        (nodeUpdated)="onNodeUpdated($event)">
+        (nodeUpdated)="onNodeUpdated($event)"
+        (nodeDeleted)="onNodeDeleted($event)"
+        (panelClosed)="closePropertiesPanel()">
       </app-properties-panel>
-    </div>
+    </aside>
   </div>
 
-  <!-- Status Bar -->
-  <div class="status-bar">
-    <span>Nodes: {{currentFlow?.nodes?.length || 0}}</span>
-    <span>Connections: {{currentFlow?.connections?.length || 0}}</span>
-    <span>Zoom: {{zoomLevel}}%</span>
-  </div>
+  <!-- Bottom Status Bar -->
+  <footer class="status-bar">
+    <div class="status-left">
+      <span class="status-item">
+        <mat-icon>account_tree</mat-icon>
+        {{currentFlow?.nodes?.length || 0}} nodes
+      </span>
+      <span class="status-item">
+        <mat-icon>timeline</mat-icon>
+        {{currentFlow?.connections?.length || 0}} connections
+      </span>
+      <span class="status-item" *ngIf="selectedNode">
+        <mat-icon>radio_button_checked</mat-icon>
+        {{selectedNode.label}} selected
+      </span>
+    </div>
+
+    <div class="status-right">
+      <span class="status-item">
+        <mat-icon>zoom_in</mat-icon>
+        {{zoomLevel}}%
+      </span>
+      <span class="status-item" [class.saved]="isSaved" [class.unsaved]="!isSaved">
+        <mat-icon>{{isSaved ? 'check_circle' : 'edit'}}</mat-icon>
+        {{isSaved ? 'Saved' : 'Unsaved changes'}}
+      </span>
+    </div>
+  </footer>
 </div>

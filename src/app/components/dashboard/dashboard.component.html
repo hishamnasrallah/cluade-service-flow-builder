@@ -1,36 +1,31 @@
+<!-- src/app/components/dashboard/dashboard.component.html - SIMPLIFIED VERSION -->
 <div class="dashboard-container">
-  <!-- Enhanced Toolbar -->
-  <mat-toolbar color="primary" class="dashboard-toolbar">
-    <div class="toolbar-content">
-      <div class="brand-section">
-        <mat-icon class="brand-icon">account_tree</mat-icon>
-        <span class="brand-text">Service Flow Designer</span>
+  <!-- Simple Header -->
+  <header class="dashboard-header">
+    <div class="header-content">
+      <div class="brand">
+        <mat-icon>account_tree</mat-icon>
+        <h1>Service Flow Designer</h1>
       </div>
 
-      <div class="toolbar-actions">
-        <!-- Search -->
-        <mat-form-field appearance="outline" class="search-field" subscriptSizing="dynamic">
-          <mat-label>Search flows...</mat-label>
-          <input matInput [(ngModel)]="searchTerm" (input)="filterPages()">
+      <div class="header-actions">
+        <mat-form-field appearance="outline" class="search-box">
+          <input matInput
+                 placeholder="Search flows..."
+                 [(ngModel)]="searchTerm"
+                 (input)="filterPages()">
           <mat-icon matSuffix>search</mat-icon>
         </mat-form-field>
 
-        <!-- Notifications -->
-        <button mat-icon-button [matBadge]="notificationCount" matBadgeColor="warn" matTooltip="Notifications">
-          <mat-icon>notifications</mat-icon>
-        </button>
-
-        <!-- User Menu -->
-        <button mat-icon-button [matMenuTriggerFor]="userMenu" class="user-avatar">
+        <button mat-icon-button [matMenuTriggerFor]="userMenu">
           <mat-icon>account_circle</mat-icon>
         </button>
       </div>
     </div>
 
     <!-- User Menu -->
-    <mat-menu #userMenu="matMenu" class="user-menu">
+    <mat-menu #userMenu="matMenu">
       <div class="user-info">
-        <mat-icon>account_circle</mat-icon>
         <div class="user-details">
           <span class="user-name">{{currentUser?.name || 'User'}}</span>
           <span class="user-email">{{currentUser?.email || 'user@example.com'}}</span>
@@ -45,185 +40,126 @@
         <mat-icon>settings</mat-icon>
         <span>Settings</span>
       </button>
-      <button mat-menu-item>
-        <mat-icon>help</mat-icon>
-        <span>Help</span>
-      </button>
-      <mat-divider></mat-divider>
-      <button mat-menu-item (click)="logout()" class="logout-item">
-        <mat-icon>exit_to_app</mat-icon>
+      <button mat-menu-item (click)="logout()">
+        <mat-icon>logout</mat-icon>
         <span>Logout</span>
       </button>
     </mat-menu>
-  </mat-toolbar>
+  </header>
 
   <!-- Main Content -->
-  <div class="dashboard-content">
+  <main class="dashboard-main">
     <!-- Welcome Section -->
-    <div class="welcome-section animate-fade-in">
+    <section class="welcome-section">
       <div class="welcome-content">
-        <h1 class="welcome-title">
-          Welcome back, <span class="user-highlight">{{currentUser?.name || 'User'}}</span>! 👋
-        </h1>
-        <p class="welcome-subtitle">
-          Ready to create amazing workflows? Start by building a new flow or continue working on existing ones.
-        </p>
+        <h2>Welcome back, {{currentUser?.name || 'User'}}!</h2>
+        <p>Create and manage your service workflows</p>
       </div>
+
       <div class="quick-actions">
-        <button mat-raised-button color="primary" (click)="createNewFlow()" class="action-button primary">
-          <mat-icon>add_circle</mat-icon>
-          <span>New Flow</span>
+        <button mat-raised-button color="primary" (click)="createNewFlow()">
+          <mat-icon>add</mat-icon>
+          New Flow
         </button>
-        <button mat-stroked-button color="primary" (click)="importFlow()" class="action-button">
+        <button mat-stroked-button (click)="importFlow()">
           <mat-icon>upload</mat-icon>
-          <span>Import</span>
+          Import
         </button>
-        <button mat-stroked-button (click)="refreshData()" class="action-button">
+        <button mat-stroked-button (click)="refreshData()">
           <mat-icon>refresh</mat-icon>
-          <span>Refresh</span>
+          Refresh
         </button>
       </div>
-    </div>
+    </section>
 
-    <!-- Statistics Section -->
-    <div class="stats-section animate-slide-in-left" *ngIf="statistics">
-      <h2 class="section-title">Overview</h2>
+    <!-- Statistics -->
+    <section class="stats-section" *ngIf="statistics">
       <div class="stats-grid">
-        <div class="stat-card animate-scale-in" style="animation-delay: 0.1s">
-          <div class="stat-header">
-            <div class="stat-icon pages">
-              <mat-icon>description</mat-icon>
-            </div>
-            <div class="stat-trend positive" *ngIf="statistics.pages?.growth">
-              <mat-icon>trending_up</mat-icon>
-              <span>+{{statistics.pages.growth}}%</span>
-            </div>
+        <div class="stat-card">
+          <div class="stat-icon pages">
+            <mat-icon>description</mat-icon>
           </div>
-          <div class="stat-content">
-            <div class="stat-number">{{statistics.pages?.total || 0}}</div>
-            <div class="stat-label">Total Pages</div>
-            <div class="stat-sublabel">{{statistics.pages?.active || 0}} active</div>
+          <div class="stat-info">
+            <span class="stat-number">{{statistics.pages?.total || 0}}</span>
+            <span class="stat-label">Total Flows</span>
           </div>
         </div>
 
-        <div class="stat-card animate-scale-in" style="animation-delay: 0.2s">
-          <div class="stat-header">
-            <div class="stat-icon fields">
-              <mat-icon>input</mat-icon>
-            </div>
-            <div class="stat-trend positive" *ngIf="statistics.fields?.growth">
-              <mat-icon>trending_up</mat-icon>
-              <span>+{{statistics.fields.growth}}%</span>
-            </div>
+        <div class="stat-card">
+          <div class="stat-icon fields">
+            <mat-icon>input</mat-icon>
           </div>
-          <div class="stat-content">
-            <div class="stat-number">{{statistics.fields?.total || 0}}</div>
-            <div class="stat-label">Form Fields</div>
-            <div class="stat-sublabel">{{statistics.fields?.types || 0}} types</div>
+          <div class="stat-info">
+            <span class="stat-number">{{statistics.fields?.total || 0}}</span>
+            <span class="stat-label">Form Fields</span>
           </div>
         </div>
 
-        <div class="stat-card animate-scale-in" style="animation-delay: 0.3s">
-          <div class="stat-header">
-            <div class="stat-icon conditions">
-              <mat-icon>rule</mat-icon>
-            </div>
-            <div class="stat-trend neutral" *ngIf="statistics.conditions?.growth === 0">
-              <mat-icon>trending_flat</mat-icon>
-              <span>0%</span>
-            </div>
+        <div class="stat-card">
+          <div class="stat-icon conditions">
+            <mat-icon>rule</mat-icon>
           </div>
-          <div class="stat-content">
-            <div class="stat-number">{{statistics.conditions?.total || 0}}</div>
-            <div class="stat-label">Conditions</div>
-            <div class="stat-sublabel">{{statistics.conditions?.active || 0}} active</div>
+          <div class="stat-info">
+            <span class="stat-number">{{statistics.conditions?.total || 0}}</span>
+            <span class="stat-label">Conditions</span>
           </div>
         </div>
 
-        <div class="stat-card animate-scale-in" style="animation-delay: 0.4s">
-          <div class="stat-header">
-            <div class="stat-icon categories">
-              <mat-icon>category</mat-icon>
-            </div>
-            <div class="stat-trend positive" *ngIf="statistics.categories?.growth">
-              <mat-icon>trending_up</mat-icon>
-              <span>+{{statistics.categories.growth}}%</span>
-            </div>
+        <div class="stat-card">
+          <div class="stat-icon categories">
+            <mat-icon>category</mat-icon>
           </div>
-          <div class="stat-content">
-            <div class="stat-number">{{statistics.categories?.total || 0}}</div>
-            <div class="stat-label">Categories</div>
-            <div class="stat-sublabel">Organized</div>
+          <div class="stat-info">
+            <span class="stat-number">{{statistics.categories?.total || 0}}</span>
+            <span class="stat-label">Categories</span>
           </div>
         </div>
       </div>
-    </div>
+    </section>
 
-    <!-- Recent Activity -->
-    <div class="activity-section animate-slide-in-right">
+    <!-- Flows Section -->
+    <section class="flows-section">
       <div class="section-header">
-        <h2 class="section-title">Recent Activity</h2>
-        <button mat-button color="primary" class="view-all-button">
-          <span>View All</span>
-          <mat-icon>arrow_forward</mat-icon>
-        </button>
-      </div>
-      <div class="activity-list">
-        <div class="activity-item" *ngFor="let activity of recentActivities">
-          <div class="activity-icon" [class]="activity.type">
-            <mat-icon>{{activity.icon}}</mat-icon>
-          </div>
-          <div class="activity-content">
-            <div class="activity-title">{{activity.title}}</div>
-            <div class="activity-description">{{activity.description}}</div>
-            <div class="activity-time">{{activity.time}}</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Pages Section -->
-    <div class="pages-section">
-      <div class="section-header">
-        <h2 class="section-title">Your Flows</h2>
-        <div class="section-controls">
-          <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
-            <mat-label>Filter by status</mat-label>
-            <mat-select [(ngModel)]="statusFilter" (selectionChange)="filterPages()">
+        <h3>Your Flows</h3>
+        <div class="controls">
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-select placeholder="Filter" [(ngModel)]="statusFilter" (selectionChange)="filterPages()">
               <mat-option value="">All</mat-option>
               <mat-option value="active">Active</mat-option>
               <mat-option value="inactive">Inactive</mat-option>
             </mat-select>
           </mat-form-field>
 
-          <mat-button-toggle-group [(ngModel)]="viewMode" class="view-toggle">
-            <mat-button-toggle value="grid" matTooltip="Grid View">
+          <mat-button-toggle-group [(ngModel)]="viewMode">
+            <mat-button-toggle value="grid">
               <mat-icon>grid_view</mat-icon>
             </mat-button-toggle>
-            <mat-button-toggle value="list" matTooltip="List View">
+            <mat-button-toggle value="list">
               <mat-icon>view_list</mat-icon>
             </mat-button-toggle>
           </mat-button-toggle-group>
         </div>
       </div>
 
-      <div class="pages-container" *ngIf="filteredPages.length > 0; else noPages">
+      <!-- Flows Grid -->
+      <div class="flows-container" *ngIf="filteredPages.length > 0; else noFlows">
+
         <!-- Grid View -->
-        <div class="pages-grid" *ngIf="viewMode === 'grid'">
-          <div class="page-card hover-lift"
-               *ngFor="let page of filteredPages; trackBy: trackByPageId"
-               (click)="editPage(page)"
-               [class.featured]="page.featured || false">
+        <div class="flows-grid" *ngIf="viewMode === 'grid'">
+          <div *ngFor="let page of filteredPages"
+               class="flow-card"
+               (click)="editPage(page)">
+
             <div class="card-header">
-              <div class="page-icon">
+              <div class="flow-icon">
                 <mat-icon>{{getPageIcon(page)}}</mat-icon>
               </div>
-              <button mat-icon-button [matMenuTriggerFor]="pageMenu" (click)="$event.stopPropagation()">
+              <button mat-icon-button [matMenuTriggerFor]="flowMenu" (click)="$event.stopPropagation()">
                 <mat-icon>more_vert</mat-icon>
               </button>
 
-              <!-- Page Menu -->
-              <mat-menu #pageMenu="matMenu">
+              <!-- Flow Menu -->
+              <mat-menu #flowMenu="matMenu">
                 <button mat-menu-item (click)="editPage(page)">
                   <mat-icon>edit</mat-icon>
                   <span>Edit</span>
@@ -237,7 +173,7 @@
                   <span>Export</span>
                 </button>
                 <mat-divider></mat-divider>
-                <button mat-menu-item (click)="deletePage(page)" class="delete-item">
+                <button mat-menu-item (click)="deletePage(page)" class="delete-action">
                   <mat-icon>delete</mat-icon>
                   <span>Delete</span>
                 </button>
@@ -245,64 +181,58 @@
             </div>
 
             <div class="card-content">
-              <h3 class="page-title">{{page.name}}</h3>
-              <p class="page-service">{{page.service_name}}</p>
-              <p class="page-description">{{page.description}}</p>
+              <h4 class="flow-name">{{page.name}}</h4>
+              <p class="flow-service">{{page.service_name}}</p>
+              <p class="flow-description">{{page.description}}</p>
 
-              <div class="page-meta">
-                <div class="status-badge" [class.active]="page.active_ind">
+              <div class="flow-status">
+                <span class="status-badge" [class.active]="page.active_ind">
                   <mat-icon>{{page.active_ind ? 'check_circle' : 'pause_circle'}}</mat-icon>
-                  <span>{{page.active_ind ? 'Active' : 'Inactive'}}</span>
-                </div>
-                <div class="sequence-info">
-                  <mat-icon>linear_scale</mat-icon>
-                  <span>Step {{page.sequence_number_name}}</span>
-                </div>
+                  {{page.active_ind ? 'Active' : 'Inactive'}}
+                </span>
               </div>
             </div>
 
             <div class="card-actions">
               <button mat-button color="primary" (click)="editPage(page); $event.stopPropagation()">
-                <mat-icon>edit</mat-icon>
-                <span>Edit</span>
+                Edit
               </button>
               <button mat-button (click)="viewPageSchema(page); $event.stopPropagation()">
-                <mat-icon>visibility</mat-icon>
-                <span>Preview</span>
+                Preview
               </button>
             </div>
           </div>
         </div>
 
         <!-- List View -->
-        <div class="pages-list" *ngIf="viewMode === 'list'">
-
+        <div class="flows-list" *ngIf="viewMode === 'list'">
           <div class="list-header">
-            <div class="col-name">Name</div>
-            <div class="col-service">Service</div>
-            <div class="col-status">Status</div>
-            <div class="col-modified">Modified</div>
-            <div class="col-actions">Actions</div>
+            <span class="col-name">Name</span>
+            <span class="col-service">Service</span>
+            <span class="col-status">Status</span>
+            <span class="col-actions">Actions</span>
           </div>
-          <div class="list-item hover-lift"
-               *ngFor="let page of filteredPages; trackBy: trackByPageId">
+
+          <div *ngFor="let page of filteredPages" class="list-item">
             <div class="col-name">
-              <div class="page-info">
-                <mat-icon class="page-icon-small">{{getPageIcon(page)}}</mat-icon>
+              <div class="flow-info">
+                <mat-icon>{{getPageIcon(page)}}</mat-icon>
                 <div>
-                  <div class="page-name">{{page.name}}</div>
-                  <div class="page-desc">{{page.description}}</div>
+                  <span class="flow-name">{{page.name}}</span>
+                  <span class="flow-desc">{{page.description}}</span>
                 </div>
               </div>
             </div>
+
             <div class="col-service">{{page.service_name}}</div>
+
             <div class="col-status">
-              <div class="status-badge" [class.active]="page.active_ind">
+              <span class="status-badge" [class.active]="page.active_ind">
                 <mat-icon>{{page.active_ind ? 'check_circle' : 'pause_circle'}}</mat-icon>
-                <span>{{page.active_ind ? 'Active' : 'Inactive'}}</span>
-              </div>
+                {{page.active_ind ? 'Active' : 'Inactive'}}
+              </span>
             </div>
-            <div class="col-modified">{{getRelativeTime(page.modified_date || page.updated_at || '')}}</div>
+
             <div class="col-actions">
               <button mat-icon-button (click)="editPage(page)" matTooltip="Edit">
                 <mat-icon>edit</mat-icon>
@@ -310,75 +240,60 @@
               <button mat-icon-button (click)="viewPageSchema(page)" matTooltip="Preview">
                 <mat-icon>visibility</mat-icon>
               </button>
-              <!-- Add this mat-menu template reference -->
-              <mat-menu #listPageMenu="matMenu">
-                <button mat-menu-item (click)="editPage(selectedPage)" *ngIf="selectedPage">
-                  <mat-icon>edit</mat-icon>
-                  <span>Edit</span>
-                </button>
-                <button mat-menu-item (click)="duplicatePage(selectedPage)" *ngIf="selectedPage">
+              <button mat-icon-button [matMenuTriggerFor]="listFlowMenu" matTooltip="More">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+
+              <!-- List Flow Menu -->
+              <mat-menu #listFlowMenu="matMenu">
+                <button mat-menu-item (click)="duplicatePage(page)">
                   <mat-icon>content_copy</mat-icon>
                   <span>Duplicate</span>
                 </button>
-                <button mat-menu-item (click)="exportPage(selectedPage)" *ngIf="selectedPage">
+                <button mat-menu-item (click)="exportPage(page)">
                   <mat-icon>download</mat-icon>
                   <span>Export</span>
                 </button>
                 <mat-divider></mat-divider>
-                <button mat-menu-item (click)="deletePage(selectedPage)" *ngIf="selectedPage" class="delete-item">
+                <button mat-menu-item (click)="deletePage(page)" class="delete-action">
                   <mat-icon>delete</mat-icon>
                   <span>Delete</span>
                 </button>
               </mat-menu>
-              <button mat-icon-button
-                      [matMenuTriggerFor]="listPageMenu"
-                      matTooltip="More"
-                      (click)="selectedPage = page">
-                <mat-icon>more_vert</mat-icon>
-              </button>
             </div>
           </div>
-
         </div>
-
       </div>
 
-
       <!-- Empty State -->
-      <ng-template #noPages>
-        <div class="empty-state animate-fade-in">
-          <div class="empty-illustration">
-            <mat-icon class="empty-icon">account_tree</mat-icon>
-            <div class="empty-shapes">
-              <div class="shape shape-1"></div>
-              <div class="shape shape-2"></div>
-              <div class="shape shape-3"></div>
-            </div>
-          </div>
-          <h3 class="empty-title">No flows found</h3>
-          <p class="empty-description">
-            {{searchTerm ? 'No flows match your search criteria.' : 'Get started by creating your first service flow.'}}
+      <ng-template #noFlows>
+        <div class="empty-state">
+          <mat-icon class="empty-icon">account_tree</mat-icon>
+          <h4>No flows found</h4>
+          <p *ngIf="searchTerm; else noFlowsText">
+            No flows match your search criteria.
           </p>
+          <ng-template #noFlowsText>
+            <p>Get started by creating your first service flow.</p>
+          </ng-template>
+
           <div class="empty-actions">
             <button mat-raised-button color="primary" (click)="createNewFlow()" *ngIf="!searchTerm">
-              <mat-icon>add_circle</mat-icon>
-              <span>Create Your First Flow</span>
+              <mat-icon>add</mat-icon>
+              Create Your First Flow
             </button>
-            <button mat-stroked-button (click)="clearSearch()" *ngIf="searchTerm">
-              <mat-icon>clear</mat-icon>
-              <span>Clear Search</span>
+            <button mat-button (click)="clearSearch()" *ngIf="searchTerm">
+              Clear Search
             </button>
           </div>
         </div>
       </ng-template>
-    </div>
-  </div>
+    </section>
+  </main>
 
-  <!-- Loading Overlay -->
+  <!-- Loading -->
   <div class="loading-overlay" *ngIf="loading">
-    <div class="loading-content">
-      <mat-spinner diameter="60"></mat-spinner>
-      <p>Loading your workspace...</p>
-    </div>
+    <mat-spinner></mat-spinner>
+    <p>Loading...</p>
   </div>
 </div>

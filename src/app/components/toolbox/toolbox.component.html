@@ -1,277 +1,136 @@
-<!-- src/app/components/toolbox/toolbox.component.html - CORRECTED VERSION -->
+<!-- src/app/components/toolbox/toolbox.component.html - SIMPLIFIED VERSION -->
 <div class="toolbox-container">
-  <!-- Toolbox Header -->
+  <!-- Simple Header -->
   <div class="toolbox-header">
-    <div class="header-content">
-      <div class="toolbox-title">
-        <mat-icon class="title-icon">construction</mat-icon>
-        <h3>Toolbox</h3>
-      </div>
-      <button mat-icon-button
-              matTooltip="Collapse All"
-              (click)="collapseAll()"
-              class="action-button">
-        <mat-icon>unfold_less</mat-icon>
-      </button>
+    <div class="header-title">
+      <mat-icon>construction</mat-icon>
+      <h3>Components</h3>
     </div>
 
-    <!-- Search Section -->
-    <div class="search-section">
-      <mat-form-field appearance="outline" class="search-field" subscriptSizing="dynamic">
-        <mat-label>Search components...</mat-label>
-        <input matInput
-               [(ngModel)]="searchTerm"
-               (input)="filterItems()"
-               (keydown.enter)="focusFirstResult()"
-               #searchInput>
-        <mat-icon matSuffix>search</mat-icon>
-      </mat-form-field>
-
-      <!-- Quick Filters -->
-      <div class="quick-filters" *ngIf="!searchTerm">
-        <mat-chip-listbox class="filter-chips">
-          <mat-chip-option
-            *ngFor="let filter of quickFilters"
-            [selected]="activeFilter === filter.value"
-            (selectionChange)="applyQuickFilter(filter.value)"
-            [color]="filter.color">
-            <mat-icon>{{filter.icon}}</mat-icon>
-            {{filter.label}}
-          </mat-chip-option>
-        </mat-chip-listbox>
-      </div>
-    </div>
+    <!-- Simple Search -->
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Search components...</mat-label>
+      <input matInput [(ngModel)]="searchTerm" (input)="filterItems()">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
   </div>
 
-  <!-- Toolbox Content -->
-  <div class="toolbox-content" #toolboxContent>
+  <!-- Content -->
+  <div class="toolbox-content">
     <!-- Search Results -->
     <div class="search-results" *ngIf="searchTerm && filteredItems.length > 0">
-      <div class="results-header">
-        <span class="results-count">{{filteredItems.length}} results for "{{searchTerm}}"</span>
-        <button mat-button color="primary" (click)="clearSearch()" class="clear-search">
+      <div class="results-info">
+        <span>{{filteredItems.length}} results</span>
+        <button mat-button (click)="clearSearch()" class="clear-btn">
           <mat-icon>clear</mat-icon>
-          Clear
         </button>
       </div>
 
-      <div class="search-items-grid">
-        <div *ngFor="let item of filteredItems; trackBy: trackByItem"
-             class="toolbox-item search-result"
-             [class.popular]="item.popularity && item.popularity > 7"
-             [class.new]="item.isNew"
-             [class.pro]="item.isPro"
-             [matTooltip]="getItemTooltip(item)"
-             matTooltipPosition="right"
+      <div class="items-list">
+        <div *ngFor="let item of filteredItems"
+             class="component-item"
              draggable="true"
              (dragstart)="onDragStart($event, item)"
-             (click)="addToCanvas(item)"
-             matRipple>
+             (click)="addToCanvas(item)">
 
-          <div class="item-header">
-            <div class="item-icon" [style.background]="item.color || 'var(--primary-500)'">
-              <mat-icon>{{item.icon}}</mat-icon>
-            </div>
-            <div class="item-badges">
-              <span class="badge new" *ngIf="item.isNew">NEW</span>
-              <span class="badge pro" *ngIf="item.isPro">PRO</span>
-              <span class="badge popular" *ngIf="item.popularity && item.popularity > 7">
-                    <mat-icon>star</mat-icon>
-                  </span>
-            </div>
+          <div class="item-icon" [style.background]="item.color">
+            <mat-icon>{{item.icon}}</mat-icon>
           </div>
 
-          <div class="item-content">
-            <span class="item-label">{{item.label}}</span>
+          <div class="item-info">
+            <span class="item-name">{{item.label}}</span>
             <span class="item-category">{{item.category}}</span>
           </div>
 
-          <div class="item-actions">
-            <button mat-icon-button
-                    matTooltip="Add to Canvas"
-                    (click)="addToCanvas(item); $event.stopPropagation()">
-              <mat-icon>add</mat-icon>
-            </button>
-            <button mat-icon-button
-                    matTooltip="More Info"
-                    (click)="showItemInfo(item); $event.stopPropagation()">
-              <mat-icon>info</mat-icon>
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- No Search Results -->
-    <div class="no-results" *ngIf="searchTerm && filteredItems.length === 0">
-      <mat-icon class="no-results-icon">search_off</mat-icon>
-      <h4>No components found</h4>
-      <p>Try adjusting your search terms or browse categories below.</p>
-      <button mat-stroked-button (click)="clearSearch()">
-        <mat-icon>clear</mat-icon>
-        Clear Search
-      </button>
-    </div>
-
-    <!-- Categories -->
-    <div class="categories-container" *ngIf="!searchTerm">
-      <mat-accordion multi="true" class="categories-accordion">
-        <mat-expansion-panel
-          *ngFor="let category of categories; trackBy: trackByCategory"
-          [expanded]="category.expanded"
-          class="category-panel"
-          [class]="getCategoryClass(category.name)">
-
-          <mat-expansion-panel-header class="category-header">
-            <mat-panel-title class="category-title">
-              <div class="category-icon" [style.background]="category.color">
-                <mat-icon>{{category.icon}}</mat-icon>
-              </div>
-              <span>{{category.name}}</span>
-              <span class="item-count">({{category.items.length}})</span>
-            </mat-panel-title>
-            <mat-panel-description class="category-description">
-              {{getCategoryDescription(category.name)}}
-            </mat-panel-description>
-          </mat-expansion-panel-header>
-
-          <div class="category-content">
-            <!-- Featured Items -->
-            <div class="featured-items" *ngIf="getFeaturedItems(category).length > 0">
-              <h5 class="section-subtitle">
-                <mat-icon>star</mat-icon>
-                Most Popular
-              </h5>
-              <div class="items-grid featured">
-                <div *ngFor="let item of getFeaturedItems(category); trackBy: trackByItem"
-                     class="toolbox-item featured-item"
-                     [class.new]="item.isNew"
-                     [class.pro]="item.isPro"
-                     [matTooltip]="getItemTooltip(item)"
-                     matTooltipPosition="right"
-                     draggable="true"
-                     (dragstart)="onDragStart($event, item)"
-                     (click)="addToCanvas(item)"
-                     matRipple>
-
-                  <div class="item-header">
-                    <div class="item-icon" [style.background]="item.color || category.color">
-                      <mat-icon>{{item.icon}}</mat-icon>
-                    </div>
-                    <div class="item-badges">
-                      <span class="badge new" *ngIf="item.isNew">NEW</span>
-                      <span class="badge pro" *ngIf="item.isPro">PRO</span>
-                      <div class="popularity-stars" *ngIf="item.popularity">
-                        <mat-icon *ngFor="let star of getStars(item.popularity)">star</mat-icon>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="item-content">
-                    <span class="item-label">{{item.label}}</span>
-                    <span class="item-description">{{item.description}}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- All Items -->
-            <div class="all-items">
-              <h5 class="section-subtitle" *ngIf="getFeaturedItems(category).length > 0">
-                <mat-icon>apps</mat-icon>
-                All Components
-              </h5>
-              <div class="items-grid">
-                <div *ngFor="let item of category.items; trackBy: trackByItem"
-                     class="toolbox-item"
-                     [class.featured]="item.popularity && item.popularity > 7"
-                     [class.new]="item.isNew"
-                     [class.pro]="item.isPro"
-                     [matTooltip]="getItemTooltip(item)"
-                     matTooltipPosition="right"
-                     draggable="true"
-                     (dragstart)="onDragStart($event, item)"
-                     (click)="addToCanvas(item)"
-                     matRipple>
-
-                  <div class="item-header">
-                    <div class="item-icon" [style.background]="item.color || category.color">
-                      <mat-icon>{{item.icon}}</mat-icon>
-                    </div>
-                    <div class="item-badges">
-                      <span class="badge new" *ngIf="item.isNew">NEW</span>
-                      <span class="badge pro" *ngIf="item.isPro">PRO</span>
-                    </div>
-                  </div>
-
-                  <div class="item-content">
-                    <span class="item-label">{{item.label}}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </mat-expansion-panel>
-      </mat-accordion>
-    </div>
-
-    <!-- Recent Items -->
-    <div class="recent-section" *ngIf="recentItems.length > 0 && !searchTerm">
-      <div class="section-header">
-        <h4 class="section-title">
-          <mat-icon>history</mat-icon>
-          Recently Used
-        </h4>
-        <button mat-button (click)="clearRecentItems()" class="clear-recent">
-          <mat-icon>clear_all</mat-icon>
-          Clear
-        </button>
-      </div>
-
-      <div class="recent-items-list">
-        <div *ngFor="let item of recentItems; trackBy: trackByItem"
-             class="recent-item"
-             [matTooltip]="getItemTooltip(item)"
-             matTooltipPosition="right"
-             draggable="true"
-             (dragstart)="onDragStart($event, item)"
-             (click)="addToCanvas(item)"
-             matRipple>
-
-          <div class="recent-item-icon" [style.background]="item.color || 'var(--primary-500)'">
-            <mat-icon>{{item.icon}}</mat-icon>
-          </div>
-          <div class="recent-item-info">
-            <span class="recent-item-label">{{item.label}}</span>
-            <span class="recent-item-category">{{item.category}}</span>
-          </div>
-          <button mat-icon-button (click)="addToCanvas(item); $event.stopPropagation()">
+          <button mat-icon-button class="add-btn" (click)="addToCanvas(item); $event.stopPropagation()">
             <mat-icon>add</mat-icon>
           </button>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Toolbox Footer -->
-  <div class="toolbox-footer">
-    <div class="footer-stats">
-          <span class="stat">
-            <mat-icon>widgets</mat-icon>
-            {{getTotalItemsCount()}} components
-          </span>
-      <span class="stat">
-            <mat-icon>category</mat-icon>
-        {{categories.length}} categories
-          </span>
+    <!-- No Results -->
+    <div class="no-results" *ngIf="searchTerm && filteredItems.length === 0">
+      <mat-icon>search_off</mat-icon>
+      <h4>No components found</h4>
+      <button mat-button (click)="clearSearch()">Clear Search</button>
     </div>
 
+    <!-- Categories - Simplified -->
+    <div class="categories" *ngIf="!searchTerm">
+      <div *ngFor="let category of categories" class="category-section">
+
+        <!-- Category Header -->
+        <div class="category-header" (click)="toggleCategory(category)">
+          <div class="category-title">
+            <mat-icon [style.color]="category.color">{{category.icon}}</mat-icon>
+            <span>{{category.name}}</span>
+            <span class="count">({{category.items.length}})</span>
+          </div>
+          <mat-icon class="expand-icon" [class.expanded]="category.expanded">
+            expand_more
+          </mat-icon>
+        </div>
+
+        <!-- Category Items -->
+        <div class="category-items" *ngIf="category.expanded">
+          <div *ngFor="let item of category.items"
+               class="component-item"
+               [class.popular]="item.popularity && item.popularity > 7"
+               draggable="true"
+               (dragstart)="onDragStart($event, item)"
+               (click)="addToCanvas(item)">
+
+            <div class="item-icon" [style.background]="item.color || category.color">
+              <mat-icon>{{item.icon}}</mat-icon>
+            </div>
+
+            <div class="item-info">
+              <span class="item-name">{{item.label}}</span>
+              <span class="item-desc" *ngIf="item.description">{{item.description}}</span>
+            </div>
+
+            <!-- Simple badges -->
+            <div class="item-badges">
+              <span class="badge new" *ngIf="item.isNew">NEW</span>
+              <span class="badge popular" *ngIf="item.popularity && item.popularity > 7">
+                <mat-icon>star</mat-icon>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Items - Simplified -->
+    <div class="recent-section" *ngIf="recentItems.length > 0 && !searchTerm">
+      <div class="section-header">
+        <h4>Recently Used</h4>
+        <button mat-button (click)="clearRecentItems()">Clear</button>
+      </div>
+
+      <div class="recent-items">
+        <div *ngFor="let item of recentItems"
+             class="recent-item"
+             draggable="true"
+             (dragstart)="onDragStart($event, item)"
+             (click)="addToCanvas(item)">
+
+          <div class="recent-icon" [style.background]="item.color">
+            <mat-icon>{{item.icon}}</mat-icon>
+          </div>
+          <span class="recent-name">{{item.label}}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Simple Footer -->
+  <div class="toolbox-footer">
+    <span class="component-count">{{getTotalItemsCount()}} components</span>
     <div class="footer-actions">
-      <button mat-icon-button matTooltip="Refresh Components" (click)="refreshComponents()">
+      <button mat-icon-button matTooltip="Refresh" (click)="refreshComponents()">
         <mat-icon>refresh</mat-icon>
-      </button>
-      <button mat-icon-button matTooltip="Settings" (click)="openSettings()">
-        <mat-icon>settings</mat-icon>
       </button>
       <button mat-icon-button matTooltip="Help" (click)="openHelp()">
         <mat-icon>help</mat-icon>

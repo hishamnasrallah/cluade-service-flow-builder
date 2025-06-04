@@ -1,199 +1,182 @@
+<!-- src/app/components/properties-panel/properties-panel.component.html - FIXED VERSION -->
 <div class="properties-panel">
+  <!-- Panel Header -->
   <div class="panel-header">
     <h3>Properties</h3>
-    <button mat-icon-button (click)="closePanel()">
+    <button mat-icon-button (click)="closePanel()" matTooltip="Close">
       <mat-icon>close</mat-icon>
     </button>
   </div>
 
+  <!-- Panel Content -->
   <div class="panel-content" *ngIf="node">
     <form [formGroup]="propertiesForm" (ngSubmit)="saveChanges()">
 
-      <!-- Basic Properties -->
-      <mat-card class="properties-section">
-        <mat-card-header>
-          <mat-card-title>Basic Information</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Label</mat-label>
-            <input matInput formControlName="label">
-          </mat-form-field>
+      <!-- Basic Information -->
+      <div class="form-section">
+        <h4 class="section-title">Basic Information</h4>
 
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Type</mat-label>
-            <mat-select formControlName="type" (selectionChange)="onTypeChange()">
-              <mat-option value="start">Start</mat-option>
-              <mat-option value="end">End</mat-option>
-              <mat-option value="page">Page</mat-option>
-              <mat-option value="decision">Decision</mat-option>
-              <mat-option value="condition">Condition</mat-option>
-              <mat-option value="field">Field</mat-option>
-              <mat-option value="validation">Validation</mat-option>
-              <mat-option value="calculation">Calculation</mat-option>
-            </mat-select>
-          </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Label</mat-label>
+          <input matInput formControlName="label" placeholder="Enter node label">
+        </mat-form-field>
 
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Description</mat-label>
-            <textarea matInput formControlName="description" rows="3"></textarea>
-          </mat-form-field>
-        </mat-card-content>
-      </mat-card>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Type</mat-label>
+          <mat-select formControlName="type" (selectionChange)="onTypeChange()">
+            <mat-option value="start">Start</mat-option>
+            <mat-option value="end">End</mat-option>
+            <mat-option value="page">Page</mat-option>
+            <mat-option value="field">Field</mat-option>
+            <mat-option value="decision">Decision</mat-option>
+            <mat-option value="condition">Condition</mat-option>
+            <mat-option value="validation">Validation</mat-option>
+            <mat-option value="calculation">Calculation</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Description</mat-label>
+          <textarea matInput formControlName="description" rows="3" placeholder="Describe this component..."></textarea>
+        </mat-form-field>
+      </div>
 
       <!-- Position -->
-      <mat-card class="properties-section">
-        <mat-card-header>
-          <mat-card-title>Position</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="position-inputs">
-            <mat-form-field appearance="outline">
-              <mat-label>X</mat-label>
-              <input matInput type="number" formControlName="x">
-            </mat-form-field>
-            <mat-form-field appearance="outline">
-              <mat-label>Y</mat-label>
-              <input matInput type="number" formControlName="y">
-            </mat-form-field>
-          </div>
-        </mat-card-content>
-      </mat-card>
+      <div class="form-section">
+        <h4 class="section-title">Position</h4>
+
+        <div class="position-controls">
+          <mat-form-field appearance="outline">
+            <mat-label>X Position</mat-label>
+            <input matInput type="number" formControlName="x">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Y Position</mat-label>
+            <input matInput type="number" formControlName="y">
+          </mat-form-field>
+        </div>
+      </div>
 
       <!-- Type-specific Properties -->
       <div [ngSwitch]="propertiesForm.get('type')?.value">
 
         <!-- Page Properties -->
-        <mat-card class="properties-section" *ngSwitchCase="'page'">
-          <mat-card-header>
-            <mat-card-title>Page Configuration</mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Service</mat-label>
-              <mat-select formControlName="service">
-                <mat-option *ngFor="let service of services" [value]="service.id">
-                  {{service.name}}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
+        <div class="form-section" *ngSwitchCase="'page'">
+          <h4 class="section-title">Page Settings</h4>
 
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Page Name</mat-label>
-              <input matInput formControlName="pageName">
-            </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Service</mat-label>
+            <mat-select formControlName="service">
+              <mat-option *ngFor="let service of services" [value]="service.id">
+                {{service.name}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
 
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Page Name (Arabic)</mat-label>
-              <input matInput formControlName="pageNameAra">
-            </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Page Name</mat-label>
+            <input matInput formControlName="pageName" placeholder="Enter page name">
+          </mat-form-field>
 
-            <mat-slide-toggle formControlName="activeInd">
-              Active Page
-            </mat-slide-toggle>
-          </mat-card-content>
-        </mat-card>
+          <mat-slide-toggle formControlName="activeInd" class="toggle-control">
+            Active Page
+          </mat-slide-toggle>
+        </div>
 
         <!-- Field Properties -->
-        <mat-card class="properties-section" *ngSwitchCase="'field'">
-          <mat-card-header>
-            <mat-card-title>Field Configuration</mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Field Name</mat-label>
-              <input matInput formControlName="fieldName">
-            </mat-form-field>
+        <div class="form-section" *ngSwitchCase="'field'">
+          <h4 class="section-title">Field Settings</h4>
 
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Display Name</mat-label>
-              <input matInput formControlName="fieldDisplayName">
-            </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Field Name</mat-label>
+            <input matInput formControlName="fieldName" placeholder="Enter field name">
+          </mat-form-field>
 
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Field Type</mat-label>
-              <mat-select formControlName="fieldType">
-                <mat-option *ngFor="let type of fieldTypes" [value]="type.id">
-                  {{type.name}}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Display Name</mat-label>
+            <input matInput formControlName="fieldDisplayName" placeholder="Enter display name">
+          </mat-form-field>
 
-            <div class="field-options">
-              <mat-slide-toggle formControlName="mandatory">
-                Mandatory Field
-              </mat-slide-toggle>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Field Type</mat-label>
+            <mat-select formControlName="fieldType">
+              <mat-option *ngFor="let type of fieldTypes" [value]="type.id">
+                {{type.name}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
 
-              <mat-slide-toggle formControlName="hidden">
-                Hidden Field
-              </mat-slide-toggle>
+          <div class="toggle-group">
+            <mat-slide-toggle formControlName="mandatory" class="toggle-control">
+              Required Field
+            </mat-slide-toggle>
 
-              <mat-slide-toggle formControlName="disabled">
-                Disabled Field
-              </mat-slide-toggle>
-            </div>
+            <mat-slide-toggle formControlName="hidden" class="toggle-control">
+              Hidden Field
+            </mat-slide-toggle>
 
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Sequence</mat-label>
-              <input matInput type="number" formControlName="sequence">
-            </mat-form-field>
-          </mat-card-content>
-        </mat-card>
+            <mat-slide-toggle formControlName="disabled" class="toggle-control">
+              Disabled Field
+            </mat-slide-toggle>
+          </div>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Sequence</mat-label>
+            <input matInput type="number" formControlName="sequence" min="1">
+          </mat-form-field>
+        </div>
 
         <!-- Condition Properties -->
-        <mat-card class="properties-section" *ngSwitchCase="'condition'">
-          <mat-card-header>
-            <mat-card-title>Condition Logic</mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Target Field</mat-label>
-              <mat-select formControlName="targetField">
-                <mat-option *ngFor="let field of availableFields" [value]="field.id">
-                  {{field._field_display_name}}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
+        <div class="form-section" *ngSwitchCase="'condition'">
+          <h4 class="section-title">Condition Logic</h4>
 
-            <div class="condition-builder">
-              <h4>Condition Rules</h4>
-              <div *ngFor="let rule of conditionRules; let i = index" class="condition-rule">
-                <mat-form-field appearance="outline">
-                  <mat-label>Field</mat-label>
-                  <input matInput [(ngModel)]="rule.field" [ngModelOptions]="{standalone: true}">
-                </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Target Field</mat-label>
+            <mat-select formControlName="targetField">
+              <mat-option *ngFor="let field of availableFields" [value]="field.id">
+                {{field._field_display_name}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
 
-                <mat-form-field appearance="outline">
-                  <mat-label>Operation</mat-label>
-                  <mat-select [(ngModel)]="rule.operation" [ngModelOptions]="{standalone: true}">
-                    <mat-option value="=">=</mat-option>
-                    <mat-option value="!=">!=</mat-option>
-                    <mat-option value=">">></mat-option>
-                    <mat-option value="<"><</mat-option>
-                    <mat-option value=">=">>=</mat-option>
-                    <mat-option value="<="><=</mat-option>
-                    <mat-option value="contains">Contains</mat-option>
-                    <mat-option value="startswith">Starts With</mat-option>
-                  </mat-select>
-                </mat-form-field>
-
-                <mat-form-field appearance="outline">
-                  <mat-label>Value</mat-label>
-                  <input matInput [(ngModel)]="rule.value" [ngModelOptions]="{standalone: true}">
-                </mat-form-field>
-
-                <button mat-icon-button color="warn" (click)="removeConditionRule(i)">
-                  <mat-icon>delete</mat-icon>
-                </button>
-              </div>
-
-              <button mat-stroked-button (click)="addConditionRule()">
+          <div class="condition-rules">
+            <div class="rules-header">
+              <h5>Rules</h5>
+              <button mat-icon-button type="button" (click)="addConditionRule()" matTooltip="Add Rule">
                 <mat-icon>add</mat-icon>
-                Add Rule
               </button>
             </div>
-          </mat-card-content>
-        </mat-card>
+
+            <div *ngFor="let rule of conditionRules; let i = index" class="rule-item">
+              <mat-form-field appearance="outline">
+                <mat-label>Field</mat-label>
+                <input matInput [(ngModel)]="rule.field" [ngModelOptions]="{standalone: true}">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Operation</mat-label>
+                <mat-select [(ngModel)]="rule.operation" [ngModelOptions]="{standalone: true}">
+                  <mat-option value="=">=</mat-option>
+                  <mat-option value="!=">!=</mat-option>
+                  <mat-option value=">">></mat-option>
+                  <mat-option value="<"><</mat-option>
+                  <mat-option value=">=">>=</mat-option>
+                  <mat-option value="<="><=</mat-option>
+                  <mat-option value="contains">Contains</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Value</mat-label>
+                <input matInput [(ngModel)]="rule.value" [ngModelOptions]="{standalone: true}">
+              </mat-form-field>
+
+              <button mat-icon-button type="button" (click)="removeConditionRule(i)" matTooltip="Remove Rule">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
+        </div>
 
       </div>
 
@@ -203,10 +186,12 @@
           <mat-icon>save</mat-icon>
           Save Changes
         </button>
+
         <button mat-stroked-button type="button" (click)="resetForm()">
           <mat-icon>refresh</mat-icon>
           Reset
         </button>
+
         <button mat-stroked-button color="warn" type="button" (click)="deleteNode()">
           <mat-icon>delete</mat-icon>
           Delete Node
