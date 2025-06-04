@@ -1,6 +1,10 @@
-<!-- src/app/components/flow-canvas/flow-canvas.component.html - WORKING CONNECTIONS -->
-<div class="canvas-container" [class.dragging]="isDragging" [class.panning]="isPanning" [class.connecting]="isConnecting">
-  <!-- Clean Canvas Header -->
+<!-- src/app/components/flow-canvas/flow-canvas.component.html - ENHANCED CONNECTORS -->
+<div class="canvas-container"
+     [class.dragging]="isDragging"
+     [class.panning]="isPanning"
+     [class.connecting]="isConnecting">
+
+  <!-- Enhanced Canvas Header with Connection Info -->
   <div class="canvas-header">
     <div class="canvas-info">
       <h3 class="flow-title">{{flow?.name || 'New Service Flow'}}</h3>
@@ -12,6 +16,10 @@
         <span class="stat">
           <mat-icon>timeline</mat-icon>
           {{flow?.connections?.length || 0}} connections
+        </span>
+        <span class="stat" *ngIf="validConnectionTargets.length > 0">
+          <mat-icon>link</mat-icon>
+          {{validConnectionTargets.length}} valid targets
         </span>
       </div>
     </div>
@@ -30,6 +38,22 @@
       <button mat-mini-fab matTooltip="Center View" (click)="centerView()">
         <mat-icon>center_focus_strong</mat-icon>
       </button>
+
+      <!-- Connection Settings -->
+      <mat-divider [vertical]="true"></mat-divider>
+      <button mat-mini-fab matTooltip="Toggle Grid Snap"
+              [color]="snapToGrid ? 'primary' : 'basic'"
+              (click)="snapToGrid = !snapToGrid">
+        <mat-icon>grid_4x4</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Connection Preview Overlay -->
+  <div class="connection-preview" *ngIf="connectionPreview && isConnecting">
+    <div class="preview-content" [class.valid]="connectionPreview.valid" [class.invalid]="!connectionPreview.valid">
+      <mat-icon>{{connectionPreview.valid ? 'check_circle' : 'error'}}</mat-icon>
+      <span>{{connectionPreview.message}}</span>
     </div>
   </div>
 
@@ -47,30 +71,55 @@
          (dragover)="onDragOver($event)"
          (click)="onCanvasClick($event)">
 
-      <!-- Grid Background -->
-      <div class="grid-background"></div>
+      <!-- Enhanced Grid Background -->
+      <div class="grid-background" [class.snap-enabled]="snapToGrid"></div>
 
-      <!-- Connections Layer -->
+      <!-- Enhanced Connections Layer -->
       <svg class="connections-layer"
            [attr.width]="canvasWidth"
            [attr.height]="canvasHeight">
         <defs>
-          <marker id="arrowhead" markerWidth="10" markerHeight="8"
-                  refX="9" refY="4" orient="auto">
-            <polygon points="0 0, 10 4, 0 8" fill="#6b7280" />
+          <!-- Enhanced Arrow Markers -->
+          <marker id="arrowhead" markerWidth="12" markerHeight="10"
+                  refX="11" refY="5" orient="auto">
+            <polygon points="0 0, 12 5, 0 10" fill="#6b7280" />
           </marker>
-          <marker id="arrowhead-selected" markerWidth="10" markerHeight="8"
-                  refX="9" refY="4" orient="auto">
-            <polygon points="0 0, 10 4, 0 8" fill="#3b82f6" />
+          <marker id="arrowhead-selected" markerWidth="12" markerHeight="10"
+                  refX="11" refY="5" orient="auto">
+            <polygon points="0 0, 12 5, 0 10" fill="#3b82f6" />
           </marker>
+          <marker id="arrowhead-success" markerWidth="12" markerHeight="10"
+                  refX="11" refY="5" orient="auto">
+            <polygon points="0 0, 12 5, 0 10" fill="#10b981" />
+          </marker>
+          <marker id="arrowhead-error" markerWidth="12" markerHeight="10"
+                  refX="11" refY="5" orient="auto">
+            <polygon points="0 0, 12 5, 0 10" fill="#ef4444" />
+          </marker>
+          <marker id="arrowhead-warning" markerWidth="12" markerHeight="10"
+                  refX="11" refY="5" orient="auto">
+            <polygon points="0 0, 12 5, 0 10" fill="#f59e0b" />
+          </marker>
+
+          <!-- Glow Effects for Connections -->
+          <filter id="connection-glow">
+            <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+            <feMerge>
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
         </defs>
 
-        <!-- Connection Paths -->
+        <!-- Connection Paths with Enhanced Styling -->
         <g class="connections-group">
           <path *ngFor="let connection of flow?.connections; trackBy: trackByConnectionId"
                 [attr.d]="getConnectionPath(connection)"
                 class="connection-path"
                 [class.selected]="selectedConnection === connection.id"
+                [class.success]="connection.condition === 'true' || connection.condition === 'valid'"
+                [class.error]="connection.condition === 'false' || connection.condition === 'invalid'"
+                [class.warning]="connection.condition && !['true', 'false', 'valid', 'invalid'].includes(connection.condition)"
                 [attr.stroke]="getConnectionColor(connection)"
                 [attr.stroke-width]="getConnectionWidth(connection)"
                 [attr.marker-end]="getConnectionMarker(connection)"
@@ -78,15 +127,30 @@
                 fill="none">
           </path>
         </g>
+
+        <!-- Connection Labels -->
+        <g class="connection-labels">
+          <text *ngFor="let connection of flow?.connections; trackBy: trackByConnectionId"
+                class="connection-label"
+                [class.selected]="selectedConnection === connection.id"
+                [attr.x]="getConnectionLabelPosition(connection).x"
+                [attr.y]="getConnectionLabelPosition(connection).y"
+                text-anchor="middle"
+                dominant-baseline="middle">
+            {{connection.condition || 'Next'}}
+          </text>
+        </g>
       </svg>
 
-      <!-- Nodes Layer -->
+      <!-- Enhanced Nodes Layer -->
       <div class="nodes-layer">
         <div *ngFor="let node of flow?.nodes; trackBy: trackByNodeId"
              class="flow-node"
              [class.selected]="selectedNode?.id === node.id"
              [class.dragging]="dragNode?.id === node.id"
              [class]="'node-type-' + node.type"
+             [class.connection-source]="connectionStart?.nodeId === node.id"
+             [class.valid-target]="isConnecting && validConnectionTargets.some(id => id.includes(node.id))"
              [style.left.px]="node.position.x"
              [style.top.px]="node.position.y"
              (click)="selectNode(node, $event)"
@@ -120,23 +184,45 @@
             </div>
           </div>
 
-          <!-- Connection Points - SIMPLIFIED -->
-          <div class="connection-points" *ngIf="selectedNode?.id === node.id">
+          <!-- Enhanced Connection Points -->
+          <div class="connection-points" *ngIf="selectedNode?.id === node.id || isConnecting">
+
             <!-- Input Connection Point -->
             <div class="connection-point input"
                  *ngIf="canHaveInputConnection(node)"
+                 [ngClass]="getInputConnectionClasses(node.id)"
                  (mousedown)="startConnection(node, 'input', $event)"
-                 matTooltip="Input">
-              <div class="connection-dot"></div>
+                 [matTooltip]="getInputConnectionTooltip()">
+              <div class="connection-dot">
+                <div class="connection-ring" *ngIf="isInputConnectionHovered(node.id)"></div>
+                <mat-icon class="connection-icon" *ngIf="isConnecting && isInputConnectionValid(node.id)">
+                  check_circle
+                </mat-icon>
+              </div>
+              <span class="connection-label">Input</span>
             </div>
 
             <!-- Output Connection Points -->
             <div class="connection-point output"
                  *ngFor="let output of getOutputConnectionPoints(node); let i = index"
+                 [ngClass]="getOutputConnectionClasses(node.id, i)"
                  (mousedown)="startConnection(node, 'output', $event, i)"
                  [style.top.px]="getOutputConnectionPosition(node, i)"
-                 [matTooltip]="output.label || 'Output'">
-              <div class="connection-dot"></div>
+                 [matTooltip]="getOutputConnectionTooltip(output)">
+              <div class="connection-dot">
+                <div class="connection-ring" *ngIf="isOutputConnectionHovered(node.id, i)"></div>
+                <mat-icon class="connection-icon" *ngIf="isConnectionStartNode(node.id, i)">
+                  radio_button_checked
+                </mat-icon>
+              </div>
+              <span class="connection-label">{{output.label}}</span>
+            </div>
+          </div>
+
+          <!-- Node Connection Status Indicator -->
+          <div class="node-status" *ngIf="isConnecting">
+            <div class="status-indicator"
+                 [ngClass]="getNodeStatusClasses(node.id)">
             </div>
           </div>
 
@@ -163,7 +249,7 @@
         </div>
       </div>
 
-      <!-- Drop Zone -->
+      <!-- Enhanced Drop Zone -->
       <div class="drop-zone"
            *ngIf="showDropZone"
            [style.left.px]="dropZone.x - 60"
@@ -174,12 +260,17 @@
     </div>
   </div>
 
-  <!-- Temporary Connection - FIXED POSITIONING -->
+  <!-- Enhanced Temporary Connection -->
   <svg class="temp-connection-overlay"
        *ngIf="tempConnection && isConnecting"
        style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1000;">
+
+    <!-- Connection Path -->
     <path [attr.d]="getTempConnectionPath()"
-          stroke="#3b82f6"
+          class="temp-connection-path"
+          [class.valid]="connectionPreview?.valid"
+          [class.invalid]="connectionPreview && !connectionPreview.valid"
+          [attr.stroke]="connectionPreview?.valid ? '#10b981' : '#6b7280'"
           stroke-width="3"
           stroke-dasharray="8,4"
           fill="none"
@@ -189,25 +280,81 @@
                dur="1s"
                repeatCount="indefinite"/>
     </path>
+
+    <!-- Connection End Indicator -->
+    <circle [attr.cx]="tempConnection.x2"
+            [attr.cy]="tempConnection.y2"
+            r="8"
+            [attr.fill]="connectionPreview?.valid ? '#10b981' : '#6b7280'"
+            opacity="0.6">
+      <animate attributeName="r"
+               values="8;12;8"
+               dur="1.5s"
+               repeatCount="indefinite"/>
+    </circle>
   </svg>
 
-  <!-- Context Menu -->
+  <!-- Connection Instructions Overlay -->
+  <div class="connection-instructions" *ngIf="isConnecting">
+    <div class="instructions-content">
+      <mat-icon>info</mat-icon>
+      <span>Drag to connect nodes</span>
+      <small>ESC to cancel</small>
+    </div>
+  </div>
+
+  <!-- Enhanced Context Menu -->
   <div class="context-menu"
        *ngIf="contextMenu.show"
        [style.left.px]="contextMenu.x"
        [style.top.px]="contextMenu.y">
-    <div class="menu-item" (click)="pasteNode()" [class.disabled]="!hasClipboardContent()">
-      <mat-icon>paste</mat-icon>
-      <span>Paste</span>
+
+    <div class="menu-section">
+      <div class="menu-item" (click)="pasteNode()" [class.disabled]="!hasClipboardContent()">
+        <mat-icon>paste</mat-icon>
+        <span>Paste Node</span>
+        <small>Ctrl+V</small>
+      </div>
+      <div class="menu-item" (click)="selectAll()">
+        <mat-icon>select_all</mat-icon>
+        <span>Select All</span>
+        <small>Ctrl+A</small>
+      </div>
     </div>
-    <div class="menu-item" (click)="selectAll()">
-      <mat-icon>select_all</mat-icon>
-      <span>Select All</span>
-    </div>
+
     <div class="menu-divider"></div>
-    <div class="menu-item" (click)="addNote()">
-      <mat-icon>note_add</mat-icon>
-      <span>Add Note</span>
+
+    <div class="menu-section">
+      <div class="menu-item" (click)="addNote()">
+        <mat-icon>note_add</mat-icon>
+        <span>Add Note</span>
+      </div>
+    </div>
+
+    <div class="menu-divider"></div>
+
+    <div class="menu-section">
+      <div class="menu-item" (click)="toggleSnapToGrid()">
+        <mat-icon>{{getSnapToGridIcon()}}</mat-icon>
+        <span>{{getSnapToGridText()}}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Connection Help Panel -->
+  <div class="connection-help" *ngIf="isConnecting && !connectionPreview">
+    <div class="help-content">
+      <h4>Connection Rules</h4>
+      <div class="rule-list">
+        <div class="rule-item" *ngFor="let rule of connectionRules.slice(0, 5)">
+          <span class="rule-from">{{rule.sourceType}}</span>
+          <mat-icon>arrow_forward</mat-icon>
+          <span class="rule-to">{{rule.targetType}}</span>
+          <mat-icon class="rule-status" [color]="rule.allowed ? 'primary' : 'warn'">
+            {{rule.allowed ? 'check' : 'close'}}
+          </mat-icon>
+        </div>
+      </div>
     </div>
   </div>
 </div>
